@@ -1,26 +1,258 @@
 @import "tailwindcss";
 
+/* ============================================
+   PICKLECART DESIGN SYSTEM
+   ============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Brand Colors ── */
+  --heritage-green: #2D5016;
+  --heritage-green-light: #4A7C28;
+  --heritage-green-dark: #1E3A0E;
+  --pickle-red: #C23B22;
+  --pickle-red-dark: #9E2B1E;
+  --pickle-red-light: #D4574A;
+  --turmeric-gold: #D4A843;
+  --turmeric-gold-light: #E8C96A;
+  --turmeric-gold-dark: #B88C2E;
+  --earthy-brown: #6B4226;
+  --earthy-brown-light: #8B6242;
+  --earthy-brown-dark: #4A2D1A;
+
+  /* ── Neutral Palette ── */
+  --cream: #FDF6EC;
+  --cream-dark: #F5EBDA;
+  --parchment: #FAF3E6;
+  --warm-white: #FEFCF7;
+  --charcoal: #2C2418;
+  --charcoal-light: #4A3F33;
+  --charcoal-muted: #6B5F52;
+
+  /* ── Semantic ── */
+  --background: var(--cream);
+  --foreground: var(--charcoal);
+  --surface: var(--warm-white);
+  --surface-alt: var(--cream-dark);
+  --border: #E5DDD0;
+  --border-light: #EDE7DB;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(44, 36, 24, 0.06);
+  --shadow-md: 0 4px 12px rgba(44, 36, 24, 0.08);
+  --shadow-lg: 0 8px 24px rgba(44, 36, 24, 0.1);
+  --shadow-xl: 0 12px 40px rgba(44, 36, 24, 0.12);
+
+  /* ── Transitions ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
 }
 
+/* ── Tailwind v4 Theme Tokens ── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-heritage-green: var(--heritage-green);
+  --color-heritage-green-light: var(--heritage-green-light);
+  --color-heritage-green-dark: var(--heritage-green-dark);
+  --color-pickle-red: var(--pickle-red);
+  --color-pickle-red-dark: var(--pickle-red-dark);
+  --color-pickle-red-light: var(--pickle-red-light);
+  --color-turmeric-gold: var(--turmeric-gold);
+  --color-turmeric-gold-light: var(--turmeric-gold-light);
+  --color-turmeric-gold-dark: var(--turmeric-gold-dark);
+  --color-earthy-brown: var(--earthy-brown);
+  --color-earthy-brown-light: var(--earthy-brown-light);
+  --color-earthy-brown-dark: var(--earthy-brown-dark);
+  --color-cream: var(--cream);
+  --color-cream-dark: var(--cream-dark);
+  --color-parchment: var(--parchment);
+  --color-warm-white: var(--warm-white);
+  --color-charcoal: var(--charcoal);
+  --color-charcoal-light: var(--charcoal-light);
+  --color-charcoal-muted: var(--charcoal-muted);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Typography ── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); }
+h3 { font-size: clamp(1.375rem, 3vw, 2rem); }
+h4 { font-size: clamp(1.125rem, 2.5vw, 1.5rem); }
+
+p {
+  line-height: 1.7;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Focus Styles ── */
+
+:focus-visible {
+  outline: 2px solid var(--heritage-green);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Selection ── */
+
+::selection {
+  background-color: var(--turmeric-gold-light);
+  color: var(--charcoal);
+}
+
+/* ── Scrollbar ── */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--charcoal-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--charcoal-light);
+}
+
+/* ── Container ── */
+
+.container-main {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-main {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* ── Section spacing ── */
+
+.section-padding {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .section-padding {
+    padding-top: 2.25rem;
+    padding-bottom: 2.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-padding {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* ── Swiper overrides ── */
+
+.swiper-pagination-bullet {
+  background-color: var(--charcoal-muted) !important;
+  opacity: 0.4 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: var(--warm-white) !important;
+  opacity: 1 !important;
+}
+
+/* ── AOS overrides for reduced motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Body scroll lock ── */
+
+body.menu-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
 }
