@@ -94,7 +94,9 @@ export const metadata = {
     apple: "/apple-icon.png",
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      "hEFgALIWTd5nv4hDUeW6iSD6lwjJyspdciY_YpYFZVc",
   },
 };
 
