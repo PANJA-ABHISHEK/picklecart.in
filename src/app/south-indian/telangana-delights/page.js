@@ -10,8 +10,6 @@ export const metadata = {
     "Explore authentic Telangana food products — traditional pickles, podis, and snacks from the Deccan heartland.",
 };
 
-export const instant = false;
-
 export default async function TelanganaDelightsPage() {
   const region = REGIONS.find((r) => r.id === REGION_ID);
   const allProducts = await getProductsByRegion(REGION_ID);
