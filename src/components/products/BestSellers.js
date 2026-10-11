@@ -5,9 +5,18 @@ import Button from "@/components/ui/Button";
 import { connection } from "next/server";
 
 export default async function BestSellers() {
-  await connection();
-  const bestSellersFull = await getBestSellingProducts();
-  const bestSellers = bestSellersFull.slice(0, 8);
+  let bestSellers = [];
+  try {
+    await connection();
+    const bestSellersFull = await getBestSellingProducts();
+    bestSellers = (bestSellersFull || []).slice(0, 8);
+  } catch (error) {
+    console.error("Failed to load best sellers:", error);
+  }
+
+  if (bestSellers.length === 0) {
+    return null;
+  }
 
   return (
     <section className="section-padding bg-cream" aria-label="Best selling products">

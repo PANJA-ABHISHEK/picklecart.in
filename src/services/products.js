@@ -4,72 +4,124 @@ import { adminDb } from "@/lib/firebase/admin";
 import { connection } from "next/server";
 
 export async function getProducts() {
-  await connection();
-  const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    await connection();
+    if (!adminDb) return [];
+    const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
 }
 
 export async function getProductBySlug(slug) {
-  await connection();
-  const doc = await adminDb.collection("products").doc(slug).get();
-  if (!doc.exists) return null;
-  return { id: doc.id, ...doc.data() };
+  try {
+    await connection();
+    if (!adminDb) return null;
+    const doc = await adminDb.collection("products").doc(slug).get();
+    if (!doc.exists) return null;
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error(`Error fetching product ${slug}:`, error);
+    return null;
+  }
 }
 
 export async function getProductsByCategory(categoryId) {
-  await connection();
-  const snapshot = await adminDb.collection("products").where("categoryId", "==", categoryId).get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    await connection();
+    if (!adminDb) return [];
+    const snapshot = await adminDb.collection("products").where("categoryId", "==", categoryId).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error(`Error fetching products for category ${categoryId}:`, error);
+    return [];
+  }
 }
 
 export async function getProductsByRegion(regionId) {
-  await connection();
-  
-  // New schema: products with 'regions' array
-  const snapshotArray = await adminDb.collection("products").where("regions", "array-contains", regionId).get();
-  // Old schema: products with 'regionId' string
-  const snapshotString = await adminDb.collection("products").where("regionId", "==", regionId).get();
-  
-  const productsMap = new Map();
-  snapshotArray.docs.forEach(doc => productsMap.set(doc.id, { id: doc.id, ...doc.data() }));
-  snapshotString.docs.forEach(doc => productsMap.set(doc.id, { id: doc.id, ...doc.data() }));
-  
-  return Array.from(productsMap.values());
+  try {
+    await connection();
+    if (!adminDb) return [];
+    
+    // New schema: products with 'regions' array
+    const snapshotArray = await adminDb.collection("products").where("regions", "array-contains", regionId).get();
+    // Old schema: products with 'regionId' string
+    const snapshotString = await adminDb.collection("products").where("regionId", "==", regionId).get();
+    
+    const productsMap = new Map();
+    snapshotArray.docs.forEach(doc => productsMap.set(doc.id, { id: doc.id, ...doc.data() }));
+    snapshotString.docs.forEach(doc => productsMap.set(doc.id, { id: doc.id, ...doc.data() }));
+    
+    return Array.from(productsMap.values());
+  } catch (error) {
+    console.error(`Error fetching products for region ${regionId}:`, error);
+    return [];
+  }
 }
 
 export async function getProductsByRegionAndCategory(regionId, categoryId) {
-  const byRegion = await getProductsByRegion(regionId);
-  return byRegion.filter(p => p.categoryId === categoryId);
+  try {
+    const byRegion = await getProductsByRegion(regionId);
+    return byRegion.filter(p => p.categoryId === categoryId);
+  } catch (error) {
+    console.error("Error filtering products by region & category:", error);
+    return [];
+  }
 }
 
 export async function searchProducts(query) {
-  if (!query || !query.trim()) return [];
-  const q = query.toLowerCase().trim();
-  
-  // Since Firestore doesn't have native full-text search, we fetch all and filter for this scale
-  const allProducts = await getProducts();
-  return allProducts.filter(p => {
-    const searchable = [p.name, p.description, p.categoryId, p.regionId, ...(p.regions || [])].join(" ").toLowerCase();
-    return searchable.includes(q);
-  });
+  try {
+    if (!query || !query.trim()) return [];
+    const q = query.toLowerCase().trim();
+    
+    // Since Firestore doesn't have native full-text search, we fetch all and filter for this scale
+    const allProducts = await getProducts();
+    return allProducts.filter(p => {
+      const searchable = [p.name, p.description, p.categoryId, p.regionId, ...(p.regions || [])].join(" ").toLowerCase();
+      return searchable.includes(q);
+    });
+  } catch (error) {
+    console.error("Error searching products:", error);
+    return [];
+  }
 }
 
 export async function getFeaturedProducts() {
-  await connection();
-  const snapshot = await adminDb.collection("products").where("featured", "==", true).get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    await connection();
+    if (!adminDb) return [];
+    const snapshot = await adminDb.collection("products").where("featured", "==", true).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching featured products:", error);
+    return [];
+  }
 }
 
 export async function getBestSellingProducts() {
-  await connection();
-  const snapshot = await adminDb.collection("products").where("bestSeller", "==", true).get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    await connection();
+    if (!adminDb) return [];
+    const snapshot = await adminDb.collection("products").where("bestSeller", "==", true).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching best-selling products:", error);
+    return [];
+  }
 }
 
 export async function getNewestProducts(count = 8) {
-  await connection();
-  const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").limit(count).get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    await connection();
+    if (!adminDb) return [];
+    const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").limit(count).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching newest products:", error);
+    return [];
+  }
 }
 
 export async function sortProducts(productListPromise, sortBy = "featured") {
