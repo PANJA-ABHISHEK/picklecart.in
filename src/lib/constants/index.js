@@ -2,8 +2,8 @@
 
 export const SITE_NAME = "PickleCart";
 export const SITE_TAGLINE = "Fill Your Cart with Tradition";
-export const SITE_DOMAIN = "picklecart.in";
-export const SITE_URL = "https://picklecart.in";
+export const SITE_DOMAIN = "www.picklecart.in";
+export const SITE_URL = "https://www.picklecart.in";
 export const SITE_DESCRIPTION =
   "Authentic Indian pickles, podis, snacks & traditional food products. Handcrafted with traditional recipes from Andhra, Telangana, Karnataka & Tamil Nadu.";
 
