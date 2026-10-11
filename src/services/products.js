@@ -1,11 +1,9 @@
 "use server";
 
 import { adminDb } from "@/lib/firebase/admin";
-import { connection } from "next/server";
 
 export async function getProducts() {
   try {
-    await connection();
     if (!adminDb) return [];
     const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -17,7 +15,6 @@ export async function getProducts() {
 
 export async function getProductBySlug(slug) {
   try {
-    await connection();
     if (!adminDb) return null;
     const doc = await adminDb.collection("products").doc(slug).get();
     if (!doc.exists) return null;
@@ -30,7 +27,6 @@ export async function getProductBySlug(slug) {
 
 export async function getProductsByCategory(categoryId) {
   try {
-    await connection();
     if (!adminDb) return [];
     const snapshot = await adminDb.collection("products").where("categoryId", "==", categoryId).get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -42,7 +38,6 @@ export async function getProductsByCategory(categoryId) {
 
 export async function getProductsByRegion(regionId) {
   try {
-    await connection();
     if (!adminDb) return [];
     
     // New schema: products with 'regions' array
@@ -90,7 +85,6 @@ export async function searchProducts(query) {
 
 export async function getFeaturedProducts() {
   try {
-    await connection();
     if (!adminDb) return [];
     const snapshot = await adminDb.collection("products").where("featured", "==", true).get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -102,7 +96,6 @@ export async function getFeaturedProducts() {
 
 export async function getBestSellingProducts() {
   try {
-    await connection();
     if (!adminDb) return [];
     const snapshot = await adminDb.collection("products").where("bestSeller", "==", true).get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -114,7 +107,6 @@ export async function getBestSellingProducts() {
 
 export async function getNewestProducts(count = 8) {
   try {
-    await connection();
     if (!adminDb) return [];
     const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").limit(count).get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

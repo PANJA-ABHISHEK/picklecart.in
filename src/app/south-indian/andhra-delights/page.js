@@ -10,6 +10,8 @@ export const metadata = {
     "Discover bold, fiery, and authentic Andhra food products — avakaya, gongura pickle, chicken pickle, idli podi, and more from the heartland of Andhra Pradesh.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AndhraDelightsPage() {
   const region = REGIONS.find((r) => r.id === REGION_ID);
   const allProducts = await getProductsByRegion(REGION_ID);

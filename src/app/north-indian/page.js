@@ -17,6 +17,8 @@ export const metadata = {
     "Explore authentic North Indian pickles, mixed vegetable pickle, aam ka achaar, and more — made with mustard oil and traditional spices.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function NorthIndianPage() {
   const region = REGIONS.find((r) => r.id === REGION_ID);
   const allProducts = await getProductsByRegion(REGION_ID);

@@ -10,6 +10,8 @@ export const metadata = {
     "Explore unique Karnataka food products — traditional pickles, mango thokku, curry leaf podi, and more.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function KarnatakaSpecialsPage() {
   const region = REGIONS.find((r) => r.id === REGION_ID);
   const allProducts = await getProductsByRegion(REGION_ID);

@@ -6,6 +6,8 @@ import WhyPickleCart from "@/components/sections/WhyPickleCart";
 import TestimonialsSection from "@/components/testimonials/TestimonialsSection";
 import CorporateCTA from "@/components/sections/CorporateCTA";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   return (
     <>

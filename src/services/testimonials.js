@@ -1,11 +1,10 @@
 "use server";
 
 import { adminDb } from "@/lib/firebase/admin";
-import { connection } from "next/server";
 
 export async function getTestimonials() {
   try {
-    await connection();
+    if (!adminDb) return [];
     const snapshot = await adminDb.collection("testimonials").orderBy("createdAt", "desc").get();
     
     const testimonials = snapshot.docs.map(doc => ({
@@ -27,7 +26,7 @@ export async function getTestimonials() {
 
 export async function addTestimonial(data) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     const docRef = await adminDb.collection("testimonials").add({
       ...data,
       createdAt: new Date().toISOString()
@@ -40,7 +39,7 @@ export async function addTestimonial(data) {
 
 export async function updateTestimonial(id, data) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     await adminDb.collection("testimonials").doc(id).update(data);
     return { success: true };
   } catch (error) {
@@ -50,7 +49,7 @@ export async function updateTestimonial(id, data) {
 
 export async function deleteTestimonial(id) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     await adminDb.collection("testimonials").doc(id).delete();
     return { success: true };
   } catch (error) {

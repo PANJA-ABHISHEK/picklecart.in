@@ -1,11 +1,19 @@
 "use server";
 
 import { adminDb } from "@/lib/firebase/admin";
-import { connection } from "next/server";
 
 export async function getStoreSettings() {
   try {
-    await connection();
+    if (!adminDb) {
+      return {
+        announcement: {
+          enabled: false,
+          text: "",
+          bgColor: "bg-earthy-brown",
+          textColor: "text-white"
+        }
+      };
+    }
     const docRef = adminDb.collection("settings").doc("store");
     const docSnap = await docRef.get();
     
@@ -35,7 +43,7 @@ export async function getStoreSettings() {
 
 export async function updateStoreSettings(data) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     const docRef = adminDb.collection("settings").doc("store");
     await docRef.set(data, { merge: true });
     return { success: true };

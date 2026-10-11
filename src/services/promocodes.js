@@ -1,11 +1,10 @@
 "use server";
 
 import { adminDb } from "@/lib/firebase/admin";
-import { connection } from "next/server";
 
 export async function getPromoCodes() {
   try {
-    await connection();
+    if (!adminDb) return [];
     const snapshot = await adminDb.collection("promocodes").orderBy("createdAt", "desc").get();
     
     return snapshot.docs.map(doc => ({
@@ -20,7 +19,7 @@ export async function getPromoCodes() {
 
 export async function addPromoCode(data) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     
     // Convert code to uppercase and remove spaces
     const cleanCode = data.code.toUpperCase().replace(/\s+/g, '');
@@ -45,7 +44,7 @@ export async function addPromoCode(data) {
 
 export async function updatePromoCode(id, data) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     
     // If updating the code string itself, ensure it's uppercase and unique
     if (data.code) {
@@ -68,7 +67,7 @@ export async function updatePromoCode(id, data) {
 
 export async function deletePromoCode(id) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     await adminDb.collection("promocodes").doc(id).delete();
     return { success: true };
   } catch (error) {
@@ -78,7 +77,7 @@ export async function deletePromoCode(id) {
 
 export async function validatePromoCode(code, cartTotal) {
   try {
-    await connection();
+    if (!adminDb) return { valid: false, error: "Database not connected" };
     const cleanCode = code.toUpperCase().replace(/\s+/g, '');
     
     const snapshot = await adminDb.collection("promocodes").where("code", "==", cleanCode).get();

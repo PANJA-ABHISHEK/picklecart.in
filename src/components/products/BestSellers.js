@@ -2,12 +2,10 @@ import { getBestSellingProducts } from "@/services/products";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ProductCard from "@/components/products/ProductCard";
 import Button from "@/components/ui/Button";
-import { connection } from "next/server";
 
 export default async function BestSellers() {
   let bestSellers = [];
   try {
-    await connection();
     const bestSellersFull = await getBestSellingProducts();
     bestSellers = (bestSellersFull || []).slice(0, 8);
   } catch (error) {

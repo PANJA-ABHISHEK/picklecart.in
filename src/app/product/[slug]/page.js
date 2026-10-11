@@ -3,6 +3,8 @@ import { REGIONS, CATEGORIES } from "@/lib/constants";
 import ProductDetailContent from "@/components/products/ProductDetailContent";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);

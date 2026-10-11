@@ -8,6 +8,8 @@ export const metadata = {
     "Explore our collection of authentic South Indian pickles, podis, snacks, and traditional food products from Andhra, Telangana, Karnataka, and Tamil Nadu.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function SouthIndianPage() {
   const southRegions = REGIONS.filter((r) => r.parentRoute === "/south-indian");
   const regionIds = southRegions.map(r => r.id);

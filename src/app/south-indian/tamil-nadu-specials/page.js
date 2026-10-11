@@ -10,6 +10,8 @@ export const metadata = {
     "Explore authentic Tamil Nadu food products — mango thokku, milagai podi, murukku, cold-pressed oils, and more.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function TamilNaduSpecialsPage() {
   const region = REGIONS.find((r) => r.id === REGION_ID);
   const allProducts = await getProductsByRegion(REGION_ID);

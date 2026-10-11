@@ -1,13 +1,11 @@
 "use server";
 
 import { adminDb } from "@/lib/firebase/admin";
-import { connection } from "next/server";
 import { pushOrderToShiprocket, getShiprocketTracking } from "@/lib/shiprocket";
 import Razorpay from "razorpay";
 
 export async function createOrder(cartItems, customerInfo, promoCode = null) {
   try {
-    await connection();
 
     // 1. Calculate actual total from Firestore to prevent tampering
     let subtotal = 0;
@@ -102,7 +100,7 @@ export async function createOrder(cartItems, customerInfo, promoCode = null) {
 
 export async function getAdminOrders() {
   try {
-    await connection();
+    if (!adminDb) return { success: false, orders: [] };
     const snapshot = await adminDb.collection("orders").orderBy("createdAt", "desc").get();
     return {
       success: true,
@@ -126,7 +124,7 @@ export async function getAdminOrders() {
 
 export async function pushOrderToLogistics(orderId) {
   try {
-    await connection();
+    if (!adminDb) throw new Error("Database not connected");
     const orderRef = adminDb.collection("orders").doc(orderId);
     const doc = await orderRef.get();
     
@@ -162,7 +160,7 @@ export async function pushOrderToLogistics(orderId) {
 
 export async function trackOrder(orderId) {
   try {
-    await connection();
+    if (!adminDb) return { success: false, error: "Database not connected" };
     
     // Allow users to search by removing the # if they added it
     const cleanOrderId = orderId.replace('#', '').trim();
