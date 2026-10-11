@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { adminDb } from "@/lib/firebase/admin";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import { sendOrderConfirmationEmail, sendOwnerNewOrderEmail } from "@/lib/email";
 
 export async function POST(request) {
   try {
@@ -45,16 +45,22 @@ export async function POST(request) {
       paymentVerifiedAt: new Date().toISOString()
     });
 
-    // Send confirmation email
+    // Send confirmation and notification emails
     const orderData = (await orderRef.get()).data();
-    if (orderData && orderData.customer?.email) {
-      // Must await in Next.js route handlers so the process doesn't terminate early
-      await sendOrderConfirmationEmail(
-        orderRef.id, 
-        orderData.customer.email, 
-        orderData.customer.fullName, 
-        orderData.total
-      );
+    if (orderData) {
+      try {
+        if (orderData.customer?.email) {
+          await sendOrderConfirmationEmail(orderRef.id, orderData);
+        }
+      } catch (custEmailErr) {
+        console.error("Failed to send customer confirmation email:", custEmailErr);
+      }
+
+      try {
+        await sendOwnerNewOrderEmail(orderRef.id, orderData);
+      } catch (ownerEmailErr) {
+        console.error("Failed to send owner notification email:", ownerEmailErr);
+      }
     }
 
     return NextResponse.json({ success: true, message: "Payment verified successfully" });
