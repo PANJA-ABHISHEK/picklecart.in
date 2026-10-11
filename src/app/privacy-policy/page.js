@@ -1,4 +1,11 @@
-export const metadata = { title: "Privacy Policy" };
+export const metadata = {
+  title: "Privacy Policy | PickleCart",
+  description:
+    "Understand how PickleCart collects, protects, and handles customer data and payment privacy on picklecart.in.",
+  alternates: {
+    canonical: "/privacy-policy",
+  },
+};
 
 export default function PrivacyPolicyPage() {
   return (

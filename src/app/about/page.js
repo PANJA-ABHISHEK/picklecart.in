@@ -1,9 +1,21 @@
 import Image from "next/image";
 import { Leaf, Award, HandHeart, MapPin, ShieldCheck, Flame } from "lucide-react";
+import { generateBreadcrumbSchema } from "@/lib/seo/schema";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata = {
-  title: "About Us | PickleCart",
-  description: "Learn about PickleCart's story, heritage, traditional recipes, and commitment to authentic Indian food products.",
+  title: "About Us | Traditional Indian Pickles & Heritage | PickleCart Bangalore",
+  description:
+    "Learn about PickleCart's story, heritage, and traditional small-batch pickle craft. Handcrafted in Bangalore using authentic recipes, cold-pressed oils, and sun-dried spices.",
+  alternates: {
+    canonical: "/about",
+  },
+  openGraph: {
+    title: "About Us | Traditional Indian Pickles & Heritage | PickleCart Bangalore",
+    description:
+      "Learn about PickleCart's story, heritage, and traditional small-batch pickle craft in Bangalore.",
+    url: `${SITE_URL}/about`,
+  },
 };
 
 const values = [
@@ -16,8 +28,19 @@ const values = [
 ];
 
 export default function AboutPage() {
+  const breadcrumbsSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "About Us", url: "/about" },
+  ]);
+
   return (
     <div className="bg-cream">
+      {breadcrumbsSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsSchema) }}
+        />
+      )}
       {/* Hero Section */}
       <div className="relative min-h-[290px] sm:min-h-[320px] md:h-[360px] lg:h-[380px] overflow-hidden flex items-center justify-center py-10 md:py-0">
         {/* Using the original about us background image */}

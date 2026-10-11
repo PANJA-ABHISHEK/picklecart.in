@@ -4,7 +4,7 @@ import { useRef, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import { resolveImage } from "@/services/images";
 
-export default function HeroSlide({ slide, isActive }) {
+export default function HeroSlide({ slide, isActive, isFirst = false }) {
   const contentRef = useRef(null);
 
   // Subtle animation on active
@@ -77,10 +77,16 @@ export default function HeroSlide({ slide, isActive }) {
               </span>
             )}
 
-            {/* Title */}
-            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold !text-white leading-[1.1] mb-4 whitespace-pre-line drop-shadow-md">
-              {slide.title}
-            </h1>
+            {/* Title - Single semantic H1 on page, H2 on secondary slides */}
+            {isFirst ? (
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold !text-white leading-[1.1] mb-4 whitespace-pre-line drop-shadow-md">
+                {slide.title}
+              </h1>
+            ) : (
+              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold !text-white leading-[1.1] mb-4 whitespace-pre-line drop-shadow-md">
+                {slide.title}
+              </h2>
+            )}
 
             {/* Subtitle */}
             {slide.subtitle && (

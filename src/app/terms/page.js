@@ -1,4 +1,11 @@
-export const metadata = { title: "Terms & Conditions" };
+export const metadata = {
+  title: "Terms & Conditions | PickleCart",
+  description:
+    "Terms and conditions for browsing, purchasing, and placing orders on PickleCart (picklecart.in).",
+  alternates: {
+    canonical: "/terms",
+  },
+};
 
 export default function TermsPage() {
   return (

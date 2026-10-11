@@ -8,6 +8,7 @@ import { SITE_NAME, SITE_TAGLINE, CONTACT, NAV_LINKS, REGIONS } from "@/lib/cons
 
 const quickLinks = [
   { label: "Home", href: "/" },
+  { label: "Pickles in Bangalore", href: "/pickles-in-bangalore" },
   { label: "About Us", href: "/about" },
   { label: "Contact Us", href: "/contact" },
   { label: "Corporate & Bulk Orders", href: "/corporate-bulk-orders" },

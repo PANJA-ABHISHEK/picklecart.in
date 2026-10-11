@@ -1,4 +1,11 @@
-export const metadata = { title: "Shipping Policy" };
+export const metadata = {
+  title: "Shipping & Delivery Policy | Pan-India & Bangalore Delivery | PickleCart",
+  description:
+    "Learn about PickleCart shipping terms, delivery timelines across India and Bangalore, courier dispatch details, and free shipping on orders above ₹1,500.",
+  alternates: {
+    canonical: "/shipping-policy",
+  },
+};
 
 export default function ShippingPolicyPage() {
   return (

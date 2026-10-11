@@ -1,4 +1,11 @@
-export const metadata = { title: "Refund & Cancellation Policy" };
+export const metadata = {
+  title: "Refund & Cancellation Policy | PickleCart",
+  description:
+    "Review PickleCart's policies regarding order cancellations within 24 hours, damaged product replacements, returns, and refunds.",
+  alternates: {
+    canonical: "/refund-policy",
+  },
+};
 
 export default function RefundPolicyPage() {
   return (
