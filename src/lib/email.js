@@ -10,7 +10,7 @@ export async function sendOrderConfirmationEmail(orderId, customerEmail, custome
   
   try {
     const { data, error } = await resend.emails.send({
-      from: 'PickleCart <onboarding@resend.dev>', // Using testing domain provided by Resend
+      from: 'PickleCart <orders@picklecart.in>',
       to: [customerEmail],
       subject: `Order Confirmation - PickleCart #${orderId}`,
       html: `
