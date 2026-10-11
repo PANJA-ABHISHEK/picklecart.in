@@ -1,8 +1,8 @@
 export const heroSlides = [
   {
     id: "andhra-heritage",
-    image: "/picklecartimg1.png",
-    mobileImage: "/mobileimg1.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740843/picklecart_assets/picklecartimg1.png",
+    mobileImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740849/picklecart_assets/mobileimg1.png",
     eyebrow: "South Indian Heritage",
     title: "THE TASTE OF ANDHRA",
     subtitle: "Authentic Pickles. Timeless Recipes.",
@@ -14,8 +14,8 @@ export const heroSlides = [
   },
   {
     id: "traditional-preparation",
-    image: "/picklecartimg2.png",
-    mobileImage: "/mobileimg2.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740844/picklecart_assets/picklecartimg2.png",
+    mobileImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740851/picklecart_assets/mobileimg2.png",
     eyebrow: "The PickleCart Way",
     title: "MADE THE TRADITIONAL WAY",
     subtitle: "Recipes Inspired by Generations",
@@ -27,8 +27,8 @@ export const heroSlides = [
   },
   {
     id: "regional-india",
-    image: "/picklecartimg3.png",
-    mobileImage: "/mobileimg3.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740846/picklecart_assets/picklecartimg3.png",
+    mobileImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740852/picklecart_assets/mobileimg3.png",
     eyebrow: "Across India",
     title: "FLAVOURS FROM EVERY REGION",
     subtitle: "Discover India's Traditional Food Heritage",
@@ -40,8 +40,8 @@ export const heroSlides = [
   },
   {
     id: "premium-collection",
-    image: "/picklecartimg4.png",
-    mobileImage: "/mobileimg4.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740847/picklecart_assets/picklecartimg4.png",
+    mobileImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740853/picklecart_assets/mobileimg4.png",
     eyebrow: "PickleCart Favourites",
     title: "AUTHENTIC FLAVOURS.\nPREMIUM QUALITY.",
     subtitle: null,
@@ -53,8 +53,8 @@ export const heroSlides = [
   },
   {
     id: "brand-story",
-    image: "/picklecartimg5.png",
-    mobileImage: "/mobileimg5.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740848/picklecart_assets/picklecartimg5.png",
+    mobileImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740855/picklecart_assets/mobileimg5.png",
     eyebrow: "PickleCart",
     title: "FILL YOUR CART WITH TRADITION",
     subtitle: null,

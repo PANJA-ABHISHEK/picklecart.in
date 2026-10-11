@@ -59,27 +59,26 @@ export default function ContactPage() {
   return (
     <div className="bg-cream min-h-screen">
       {/* Hero */}
-      <div className="relative h-[220px] md:h-[320px] lg:h-[380px] overflow-hidden flex items-center justify-center bg-heritage-green">
-        {/* We lift the image wrapper up slightly so the bottom (where the letter and pen are) is not cut off by the wave */}
-        <div className="absolute top-[-20px] md:top-[-40px] left-0 right-0 bottom-[20px] md:bottom-[40px]">
+      <div className="relative min-h-[300px] sm:min-h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden flex items-center justify-center bg-heritage-green py-10 md:py-0">
+        <div className="absolute inset-0">
           <Image 
-            src="/contactusbackground.png" 
+            src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740863/picklecart_assets/contactusbackground.png" 
             alt="Contact PickleCart" 
             fill
-            className="object-cover object-bottom"
+            className="object-cover object-center md:object-bottom"
             priority
           />
         </div>
         <div className="absolute inset-0 bg-charcoal/30" />
         
-        <div className="relative z-10 container-main flex flex-col items-center justify-center text-center mt-[-20px] md:mt-[-40px] px-4">
-          <span className="text-xs md:text-sm font-body font-bold tracking-[0.25em] uppercase text-turmeric-gold mb-3 block drop-shadow-md">
+        <div className="relative z-10 container-main flex flex-col items-center justify-center text-center px-4 pt-4 pb-8 md:py-0">
+          <span className="text-xs md:text-sm font-body font-bold tracking-[0.25em] uppercase text-turmeric-gold mb-2 md:mb-3 block drop-shadow-md">
             Get In Touch
           </span>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-b from-white to-[#E8D4B4] bg-clip-text text-transparent drop-shadow-md text-balance mb-4">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-b from-white to-[#E8D4B4] bg-clip-text text-transparent drop-shadow-md text-balance mb-3 md:mb-4">
             Contact Us
           </h1>
-          <p className="font-body text-[#F3E5C8]/90 text-base md:text-xl max-w-2xl mx-auto drop-shadow leading-relaxed font-medium text-balance">
+          <p className="font-body text-[#F3E5C8]/90 text-sm sm:text-base md:text-xl max-w-2xl mx-auto drop-shadow leading-relaxed font-medium text-balance">
             Have a question, feedback, or just want to say hello? We&apos;d love to hear from you.
           </p>
         </div>

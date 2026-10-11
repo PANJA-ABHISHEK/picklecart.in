@@ -19,10 +19,10 @@ export default function AboutPage() {
   return (
     <div className="bg-cream">
       {/* Hero Section */}
-      <div className="relative h-[220px] md:h-[320px] lg:h-[380px] overflow-hidden flex items-center justify-center">
+      <div className="relative min-h-[290px] sm:min-h-[320px] md:h-[360px] lg:h-[380px] overflow-hidden flex items-center justify-center py-10 md:py-0">
         {/* Using the original about us background image */}
         <Image 
-          src="/aboutuspagebackground.png" 
+          src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740861/picklecart_assets/aboutuspagebackground.png" 
           alt="About PickleCart Background" 
           fill
           className="object-cover object-center"
@@ -30,14 +30,14 @@ export default function AboutPage() {
         />
         <div className="absolute inset-0 bg-charcoal/40" />
         
-        <div className="relative z-10 container-main flex flex-col items-center justify-center text-center px-4 mt-[-20px] md:mt-[-40px]" data-aos="fade-up">
-          <span className="text-xs md:text-sm font-body font-bold tracking-[0.25em] uppercase text-turmeric-gold mb-3 block drop-shadow-md">
+        <div className="relative z-10 container-main flex flex-col items-center justify-center text-center px-4 pt-4 pb-8 md:py-0" data-aos="fade-up">
+          <span className="text-xs md:text-sm font-body font-bold tracking-[0.25em] uppercase text-turmeric-gold mb-2 md:mb-3 block drop-shadow-md">
             Our Story
           </span>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-warm-white drop-shadow-lg mb-4">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-warm-white drop-shadow-lg mb-3 md:mb-4">
             The Soul of <span className="text-turmeric-gold">PickleCart</span>
           </h1>
-          <p className="font-body text-warm-white/95 text-base md:text-xl max-w-2xl mx-auto drop-shadow-md leading-relaxed font-medium">
+          <p className="font-body text-warm-white/95 text-sm sm:text-base md:text-xl max-w-2xl mx-auto drop-shadow-md leading-relaxed font-medium">
             Discover the heritage, traditional recipes, and the undeniable passion that goes into every single jar we craft.
           </p>
         </div>
@@ -59,10 +59,11 @@ export default function AboutPage() {
               {/* Increased size slightly and used lg:justify-end to push the image closer to the text, closing the empty space */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-cream inline-block w-full max-w-[280px] md:max-w-[320px] group bg-white">
                 <Image 
-                  src="/shopPhoto.png" 
+                  src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740805/picklecart_assets/shopPhoto.jpg" 
                   alt="The PickleCart Storefront" 
                   width={600}
                   height={800}
+                  loading="lazy"
                   className="w-full h-auto object-contain group-hover:scale-[1.03] transition-transform duration-1000 block"
                 />
               </div>
@@ -129,10 +130,11 @@ export default function AboutPage() {
             <div className="w-full lg:w-1/2" data-aos="fade-left">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white w-full bg-white group">
                 <Image 
-                  src="/PickleCart Andhra Traditions.png" 
+                  src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740869/picklecart_assets/PickleCart_Andhra_Traditions.png" 
                   alt="Traditional Andhra Pickle Making Collage" 
                   width={1000}
                   height={1000}
+                  loading="lazy"
                   className="w-full h-auto object-contain group-hover:scale-[1.02] transition-transform duration-700 block"
                 />
               </div>
@@ -150,9 +152,10 @@ export default function AboutPage() {
               {/* Used sticky positioning and a strong aspect ratio so it stays perfectly aligned as you read the long text on the right */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-cream w-full aspect-[4/5] group bg-charcoal/5">
                 <Image 
-                  src="/Traditional Pickle Jar Display.png" 
+                  src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740867/picklecart_assets/Traditional_Pickle_Jar_Display.png" 
                   alt="Traditional Pickle Jars" 
                   fill
+                  loading="lazy"
                   className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-1000 block"
                 />
                 <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-charcoal/95 via-charcoal/50 to-transparent pointer-events-none">
@@ -206,9 +209,10 @@ export default function AboutPage() {
            {/* Used a sleek panoramic aspect ratio instead of a towering box, making it highly attractive and responsive */}
            <div className="w-full relative rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white bg-white aspect-video md:aspect-[21/9] group">
              <Image 
-               src="/Picklecart Jar Display Shelf.png" 
+               src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740870/picklecart_assets/Picklecart_Jar_Display_Shelf.png" 
                alt="PickleCart Jar Display Shelf" 
                fill
+               loading="lazy"
                className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-1000 block"
              />
            </div>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { adminDb } from "@/lib/firebase/admin";
 import { sendOrderConfirmationEmail, sendOwnerNewOrderEmail } from "@/lib/email";
+import { pushOrderToLogistics } from "@/app/actions/orders";
 
 export async function POST(request) {
   try {
@@ -61,9 +62,21 @@ export async function POST(request) {
       } catch (ownerEmailErr) {
         console.error("Failed to send owner notification email:", ownerEmailErr);
       }
+
+      // Automatically push order to Shiprocket
+      try {
+        const logisticsResult = await pushOrderToLogistics(orderRef.id);
+        if (logisticsResult.success) {
+          console.log(`[Auto-Logistics] Order ${orderRef.id} successfully pushed to Shiprocket!`);
+        } else {
+          console.warn(`[Auto-Logistics] Shiprocket auto-push notice for ${orderRef.id}:`, logisticsResult.error);
+        }
+      } catch (srErr) {
+        console.error(`[Auto-Logistics] Shiprocket auto-push error for ${orderRef.id}:`, srErr);
+      }
     }
 
-    return NextResponse.json({ success: true, message: "Payment verified successfully" });
+    return NextResponse.json({ success: true, message: "Payment verified successfully and order processed" });
   } catch (error) {
     console.error("Payment verification failed:", error);
     return NextResponse.json({ success: false, error: error.message || "Internal server error" }, { status: 500 });

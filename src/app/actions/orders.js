@@ -45,12 +45,64 @@ export async function createOrder(cartItems, customerInfo, promoCode = null) {
 
     // 2. Apply promo code if any
     let discount = 0;
+    let appliedPromoDetails = null;
     if (promoCode) {
-      // In a real app, query promo codes collection. 
-      // For now, we'll keep it simple if it's not fully implemented in db yet.
+      try {
+        const cleanCode = promoCode.toUpperCase().replace(/\s+/g, '');
+        const promoSnap = await adminDb.collection("promocodes").where("code", "==", cleanCode).get();
+        if (!promoSnap.empty) {
+          const promoData = promoSnap.docs[0].data();
+          const now = new Date();
+          const isNotExpired = !promoData.expiryDate || new Date(promoData.expiryDate) >= now;
+          const isWithinUsage = !promoData.usageLimit || (promoData.timesUsed || 0) < promoData.usageLimit;
+          const meetsMinOrder = !promoData.minOrderValue || subtotal >= promoData.minOrderValue;
+
+          if (promoData.isActive && isNotExpired && isWithinUsage && meetsMinOrder) {
+            if (promoData.discountType === "percentage") {
+              discount = (subtotal * promoData.discountValue) / 100;
+              if (promoData.maxDiscount && discount > promoData.maxDiscount) {
+                discount = promoData.maxDiscount;
+              }
+            } else {
+              discount = promoData.discountValue;
+            }
+            if (discount > subtotal) discount = subtotal;
+            appliedPromoDetails = {
+              id: promoSnap.docs[0].id,
+              code: cleanCode,
+              discount: discount
+            };
+            // Increment usage count
+            promoSnap.docs[0].ref.update({
+              timesUsed: (promoData.timesUsed || 0) + 1
+            }).catch(err => console.error("Error updating promo timesUsed", err));
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to validate promo in createOrder:", err);
+      }
     }
     
-    const total = subtotal - discount;
+    // Shipping calculation: dynamically fetched from store settings
+    let defaultShippingFee = 99;
+    let freeShippingThreshold = 1500;
+    try {
+      const settingsSnap = await adminDb.collection("settings").doc("store").get();
+      if (settingsSnap.exists) {
+        const settingsData = settingsSnap.data();
+        if (Number(settingsData?.shipping?.defaultFee) >= 0) {
+          defaultShippingFee = Number(settingsData.shipping.defaultFee);
+        }
+        if (Number(settingsData?.shipping?.freeThreshold) >= 0) {
+          freeShippingThreshold = Number(settingsData.shipping.freeThreshold);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to read shipping settings in createOrder:", e);
+    }
+
+    const shippingFee = subtotal >= freeShippingThreshold ? 0 : defaultShippingFee;
+    const total = Math.max(0, subtotal - discount + shippingFee);
 
     if (total <= 0) {
       throw new Error("Invalid order total");
@@ -71,11 +123,18 @@ export async function createOrder(cartItems, customerInfo, promoCode = null) {
     const rzpOrder = await razorpay.orders.create(options);
 
     // 4. Save Pending Order to Firestore
+    const normalizedPhone = (customerInfo.mobile || customerInfo.phone || "").toString().trim();
     const orderData = {
-      customer: customerInfo,
+      customer: {
+        ...customerInfo,
+        phone: normalizedPhone,
+        mobile: normalizedPhone,
+      },
       items: items,
       subtotal: subtotal,
       discount: discount,
+      shipping: shippingFee,
+      promoCode: appliedPromoDetails ? appliedPromoDetails.code : null,
       total: total,
       status: "pending_payment",
       razorpayOrderId: rzpOrder.id,
@@ -158,6 +217,19 @@ export async function pushOrderToLogistics(orderId) {
   }
 }
 
+export async function deleteOrder(orderId) {
+  try {
+    if (!adminDb) throw new Error("Database not connected");
+    if (!orderId) throw new Error("Order ID is required");
+
+    await adminDb.collection("orders").doc(orderId).delete();
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete order:", error);
+    return { success: false, error: error.message || "Failed to delete order" };
+  }
+}
+
 export async function trackOrder(orderId) {
   try {
     if (!adminDb) return { success: false, error: "Database not connected" };
@@ -173,10 +245,17 @@ export async function trackOrder(orderId) {
       const cleanDigits = cleanOrderId.replace(/\D/g, '');
       const phoneToMatch = cleanDigits.length >= 10 ? cleanDigits.slice(-10) : cleanOrderId;
       
-      const phoneSnap = await adminDb.collection("orders")
+      let phoneSnap = await adminDb.collection("orders")
         .where("customer.phone", "==", phoneToMatch)
         .limit(10)
         .get();
+
+      if (phoneSnap.empty) {
+        phoneSnap = await adminDb.collection("orders")
+          .where("customer.mobile", "==", phoneToMatch)
+          .limit(10)
+          .get();
+      }
 
       if (!phoneSnap.empty) {
         const sortedDocs = phoneSnap.docs.sort((a, b) => {

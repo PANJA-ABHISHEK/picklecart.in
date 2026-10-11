@@ -27,29 +27,41 @@ export async function pushOrderToShiprocket(orderId, orderData) {
   try {
     const token = await getShiprocketToken();
 
-    // Map your Firestore orderData to Shiprocket's expected format
+    // Map your Firestore orderData to Shiprocket's expected format with safe fallbacks
+    const safeDate = (orderData.createdAt && !isNaN(new Date(orderData.createdAt).getTime()))
+      ? new Date(orderData.createdAt).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0];
+
+    const customer = orderData.customer || {};
+    const items = Array.isArray(orderData.items) ? orderData.items : [];
+
     const shiprocketPayload = {
-      order_id: orderId, // Your internal order ID
-      order_date: new Date(orderData.createdAt).toISOString().split('T')[0], // YYYY-MM-DD
+      order_id: String(orderId), // Your internal order ID
+      order_date: safeDate, // YYYY-MM-DD
       pickup_location: "Home", // Must match the Address Nickname in Shiprocket exactly
-      billing_customer_name: orderData.customer.fullName,
+      billing_customer_name: (customer.fullName || "PickleCart Customer").trim(),
       billing_last_name: "",
-      billing_address: orderData.customer.address,
-      billing_city: orderData.customer.city,
-      billing_pincode: orderData.customer.pincode,
-      billing_state: orderData.customer.state,
+      billing_address: (customer.address || "Main Street").trim(),
+      billing_city: (customer.city || "Hyderabad").trim(),
+      billing_pincode: String(customer.pincode || "500001").trim(),
+      billing_state: (customer.state || "Andhra Pradesh").trim(),
       billing_country: "India",
-      billing_email: orderData.customer.email,
-      billing_phone: orderData.customer.mobile,
+      billing_email: customer.email || "customer@picklecart.in",
+      billing_phone: customer.mobile ? String(customer.mobile).replace(/\D/g, '') : "9999999999",
       shipping_is_billing: true,
-      order_items: orderData.items.map(item => ({
-        name: item.name,
-        sku: item.productId, // using productId as SKU for simplicity
-        units: item.quantity,
-        selling_price: item.price,
-      })),
+      order_items: items.length > 0 ? items.map((item, index) => ({
+        name: item.name ? `${item.name}${item.variantLabel ? ` (${item.variantLabel})` : ''}` : `Item #${index + 1}`,
+        sku: item.variantId || item.productId || `SKU-${index + 1}`,
+        units: Number(item.quantity) || 1,
+        selling_price: Number(item.price) || 0,
+      })) : [{
+        name: "PickleCart Product",
+        sku: "SKU-DEFAULT",
+        units: 1,
+        selling_price: Number(orderData.total) || 100
+      }],
       payment_method: "Prepaid", // Razorpay means it's prepaid
-      sub_total: orderData.subtotal,
+      sub_total: Number(orderData.subtotal ?? orderData.total ?? 0),
       length: 10, // Default dimensions in cm (adjust as needed)
       breadth: 10,
       height: 10,

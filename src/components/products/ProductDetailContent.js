@@ -8,6 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import Image from "next/image";
 import ProductCard from "@/components/products/ProductCard";
 import { resolveImage } from "@/services/images";
 
@@ -90,12 +91,14 @@ export default function ProductDetailContent({
           {/* Image Gallery */}
           <div className="lg:max-w-xl mx-auto w-full">
             {/* Main Image */}
-            <div className="w-full aspect-square rounded-3xl overflow-hidden bg-cream-dark mb-4 shadow-sm border border-black/5">
-              <div
-                className="w-full h-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${mainImage})` }}
-                role="img"
-                aria-label={product.name}
+            <div className="relative w-full aspect-square rounded-3xl overflow-hidden bg-cream-dark mb-4 shadow-sm border border-black/5">
+              <Image
+                src={mainImage}
+                alt={product.name}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
               />
             </div>
 
@@ -108,16 +111,20 @@ export default function ProductDetailContent({
                     <button
                       key={i}
                       onClick={() => setSelectedImageIndex(i)}
-                      className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                      className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                         selectedImageIndex === i
                           ? "border-heritage-green"
                           : "border-border hover:border-charcoal-muted"
                       }`}
                       aria-label={`View image ${i + 1}`}
                     >
-                      <div
-                        className="w-full h-full bg-cover bg-center"
-                        style={{ backgroundImage: `url(${thumbUrl})` }}
+                      <Image
+                        src={thumbUrl}
+                        alt={`${product.name} thumbnail ${i + 1}`}
+                        fill
+                        loading="lazy"
+                        sizes="64px"
+                        className="object-cover"
                       />
                     </button>
                   );

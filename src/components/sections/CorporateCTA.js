@@ -1,16 +1,22 @@
+import Image from "next/image";
 import { Gift, Building2 } from "lucide-react";
 import Button from "@/components/ui/Button";
-export default function CorporateCTA() {
-  const bgUrl = "/bulkorderhomebackgroundimage.png";
 
+const bgUrl = "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740862/picklecart_assets/bulkorderhomebackgroundimage.png";
+
+export default function CorporateCTA() {
   return (
     <section className="py-8 md:py-10 bg-cream" aria-label="Corporate and bulk orders">
       <div className="container-main">
         <div className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-charcoal/10 border border-white/50">
-          {/* Background */}
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
-            style={{ backgroundImage: `url(${bgUrl})` }}
+          {/* Background Image */}
+          <Image
+            src={bgUrl}
+            alt="Corporate Gifting & Bulk Orders"
+            fill
+            loading="lazy"
+            sizes="(max-width: 1200px) 100vw, 1200px"
+            className="object-cover transition-transform duration-700 hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-charcoal/75 to-charcoal/30 backdrop-blur-[2px]" />
 

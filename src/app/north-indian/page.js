@@ -30,7 +30,7 @@ export default async function NorthIndianPage() {
       regions={[region]}
       categories={northCategories}
       regionFilter={REGION_ID}
-      bgImage="/northindianpagebackground.png"
+      bgImage="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740865/picklecart_assets/northindianpagebackground.png"
       allProducts={allProducts}
     />
   );

@@ -9,7 +9,7 @@ const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "picklecart";
 
 export async function loginAdmin(username, password) {
-  if (username && username.toLowerCase() === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+  if (username && username.trim().toLowerCase() === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     // Set an HTTP-only cookie
     const cookieStore = await cookies();
     cookieStore.set({
@@ -17,6 +17,7 @@ export async function loginAdmin(username, password) {
       value: "authenticated",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: "/",
     });

@@ -8,17 +8,29 @@
  * switching to Cloudinary requires zero component changes.
  */
 
+import cloudinaryMap from "@/lib/cloudinary-map.json";
+
 /**
  * Get the image URL for a given path.
- * In Phase 1, returns the path as-is (public directory or placeholder).
- * In Phase 2, this will construct a Cloudinary URL.
+ * Resolves local image paths and placeholders to high-speed Cloudinary CDN URLs.
  */
 export function getImageUrl(path, options = {}) {
   if (!path) return getPlaceholderUrl(options);
 
-  // Phase 2: Replace with Cloudinary transformation URL
-  // const { width, height, quality } = options;
-  // return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/.../${path}`;
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+
+  if (cloudinaryMap[path]) return cloudinaryMap[path];
+
+  const withSlash = path.startsWith("/") ? path : `/${path}`;
+  if (cloudinaryMap[withSlash]) return cloudinaryMap[withSlash];
+
+  const withoutSlash = path.startsWith("/") ? path.slice(1) : path;
+  if (cloudinaryMap[withoutSlash]) return cloudinaryMap[withoutSlash];
+
+  const basename = path.split("/").pop();
+  if (cloudinaryMap[basename]) return cloudinaryMap[basename];
 
   return path;
 }
@@ -26,21 +38,32 @@ export function getImageUrl(path, options = {}) {
 /**
  * Resolves an image path. If it's a mock local path for products/categories that doesn't exist yet,
  * it automatically generates and returns a beautiful placeholder.
- * It allows /images/hero/ paths through since we have those files.
  */
 export function resolveImage(path, options = {}) {
   if (!path) return getPlaceholderUrl(options);
-  
+
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+
+  if (cloudinaryMap[path]) return cloudinaryMap[path];
+  const withSlash = path.startsWith("/") ? path : `/${path}`;
+  if (cloudinaryMap[withSlash]) return cloudinaryMap[withSlash];
+  const withoutSlash = path.startsWith("/") ? path.slice(1) : path;
+  if (cloudinaryMap[withoutSlash]) return cloudinaryMap[withoutSlash];
+  const basename = path.split("/").pop();
+  if (cloudinaryMap[basename]) return cloudinaryMap[basename];
+
   if (path.startsWith("/images/products/") || path.startsWith("/images/categories/") || path.startsWith("/images/regions/")) {
     return getPlaceholderUrl(options);
   }
-  
+
   return getImageUrl(path, options);
 }
 
 /**
  * Generate a beautiful image URL.
- * Since external services were failing, we use a guaranteed local food image.
+ * Maps keywords to our high-resolution Cloudinary placeholder URLs.
  */
 export function getPlaceholderUrl({
   width = 800,
@@ -48,18 +71,17 @@ export function getPlaceholderUrl({
   text = "PickleCart",
 } = {}) {
   const lower = text.toLowerCase();
-  
-  // Intelligently map keywords to our downloaded realistic placeholder images
-  if (lower.includes('gongura')) return '/images/placeholders/gongura.jpg';
-  if (lower.includes('chicken') || lower.includes('mutton') || lower.includes('prawn') || lower.includes('non-veg')) return '/images/placeholders/mutton.jpg';
-  if (lower.includes('oil')) return '/images/placeholders/oil.jpg';
-  if (lower.includes('millet') || lower.includes('grocer') || lower.includes('idli')) return '/images/placeholders/millet.jpg';
-  if (lower.includes('snack') || lower.includes('murukku') || lower.includes('mixture') || lower.includes('pakoda')) return '/images/placeholders/snack.jpg';
-  if (lower.includes('sweet') || lower.includes('laddu')) return '/images/placeholders/sweet.jpg';
-  if (lower.includes('podi') || lower.includes('powder') || lower.includes('karam') || lower.includes('chutney')) return '/images/placeholders/food-1.jpg'; // Samosa/chutney for podis
-  
-  // By default, since this is PickleCart, return a beautiful pickle image
-  return `/images/placeholders/pickle.jpg`;
+  let relPath = '/images/placeholders/pickle.jpg';
+
+  if (lower.includes('gongura')) relPath = '/images/placeholders/gongura.jpg';
+  else if (lower.includes('chicken') || lower.includes('mutton') || lower.includes('prawn') || lower.includes('non-veg')) relPath = '/images/placeholders/mutton.jpg';
+  else if (lower.includes('oil')) relPath = '/images/placeholders/oil.jpg';
+  else if (lower.includes('millet') || lower.includes('grocer') || lower.includes('idli')) relPath = '/images/placeholders/millet.jpg';
+  else if (lower.includes('snack') || lower.includes('murukku') || lower.includes('mixture') || lower.includes('pakoda')) relPath = '/images/placeholders/snack.jpg';
+  else if (lower.includes('sweet') || lower.includes('laddu')) relPath = '/images/placeholders/sweet.jpg';
+  else if (lower.includes('podi') || lower.includes('powder') || lower.includes('karam') || lower.includes('chutney')) relPath = '/images/placeholders/food-1.jpg';
+
+  return cloudinaryMap[relPath] || relPath;
 }
 
 /**

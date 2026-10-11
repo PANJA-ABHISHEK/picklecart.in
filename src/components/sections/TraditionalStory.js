@@ -1,4 +1,5 @@
-import { getPlaceholderUrl } from "@/services/images";
+import Image from "next/image";
+import { resolveImage } from "@/services/images";
 
 const steps = [
   {
@@ -6,28 +7,28 @@ const steps = [
     title: "Select Ingredients",
     description:
       "We begin with the finest seasonal produce — hand-picked mangoes, fresh gongura, sun-dried chillies, and premium spices sourced directly from trusted farmers.",
-    image: "/images/story/ingredients.jpg",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740873/picklecart_assets/ingredients.jpg",
   },
   {
     step: "02",
     title: "Traditional Preparation",
     description:
       "Each recipe follows time-honoured methods — hand-cut, sun-dried, and slow-mixed to ensure every ingredient retains its natural flavour and character.",
-    image: "/images/story/preparation.jpg",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740874/picklecart_assets/preparation.jpg",
   },
   {
     step: "03",
     title: "Spice & Season",
     description:
       "Our signature spice blends are carefully measured and mixed by hand. No artificial preservatives — just authentic combinations perfected over generations.",
-    image: "/picklecartimg2.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740844/picklecart_assets/picklecartimg2.png",
   },
   {
     step: "04",
     title: "Seal & Deliver",
     description:
       "Prepared with care and sealed to preserve freshness, every jar reaches your table with the same homemade warmth and quality we stand behind.",
-    image: "/Traditional Pickle Jar Display.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740867/picklecart_assets/Traditional_Pickle_Jar_Display.png",
   },
 ];
 
@@ -52,7 +53,7 @@ export default function TraditionalStory() {
         <div className="space-y-12 md:space-y-0">
           {steps.map((item, i) => {
             const isReversed = i % 2 !== 0;
-            const bgUrl = item.image || getPlaceholderUrl({ width: 600, height: 500, text: item.title });
+            const imgUrl = resolveImage(item.image);
 
             return (
               <div
@@ -68,11 +69,13 @@ export default function TraditionalStory() {
                     isReversed ? "md:order-2" : ""
                   }`}
                 >
-                  <div
-                    className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url('${bgUrl}')` }}
-                    role="img"
-                    aria-label={item.title}
+                  <Image
+                    src={imgUrl}
+                    alt={item.title}
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
                   />
                   {/* Step number overlay */}
                   <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-warm-white/95 backdrop-blur-sm text-charcoal shadow-lg flex items-center justify-center text-base font-display font-bold border border-warm-white/50">

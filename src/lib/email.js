@@ -78,10 +78,17 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
     return null;
   }
 
+  const addressParts = customerInfo
+    ? [
+        customerInfo.address,
+        customerInfo.landmark ? `(Landmark: ${customerInfo.landmark})` : null,
+        customerInfo.city,
+        customerInfo.state,
+        customerInfo.pincode ? `- ${customerInfo.pincode}` : null,
+      ].filter(Boolean)
+    : [];
+  const deliveryAddress = addressParts.join(", ");
   const itemsTable = renderItemsHtml(items);
-  const deliveryAddress = customerInfo
-    ? [customerInfo.address, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(", ")
-    : "";
 
   try {
     const { data, error } = await resend.emails.send({
@@ -157,12 +164,14 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
     });
 
     if (error) {
-      console.error("Resend customer confirmation email error:", error);
+      console.error("[Email] Resend customer confirmation email error:", error);
+      return { success: false, error };
     }
-    return data;
+    console.log(`[Email] Customer confirmation email sent successfully to ${customerEmail} (ID: ${data?.id})`);
+    return { success: true, data };
   } catch (err) {
-    console.error("Failed to send customer confirmation email:", err);
-    return null;
+    console.error("[Email] Failed to send customer confirmation email:", err);
+    return { success: false, error: err.message };
   }
 }
 
@@ -180,11 +189,19 @@ export async function sendOwnerNewOrderEmail(orderId, orderData) {
   const total = orderData.total || 0;
   const subtotal = orderData.subtotal || total;
   const discount = orderData.discount || 0;
+  const shipping = orderData.shipping !== undefined ? orderData.shipping : (subtotal >= 1500 ? 0 : 99);
   const paymentId = orderData.razorpayPaymentId || "N/A";
   const customerName = customer.fullName || "Customer";
-  const customerPhone = customer.phone || "Not provided";
+  const customerPhone = customer.mobile || customer.phone || "Not provided";
   const customerEmail = customer.email || "Not provided";
-  const fullAddress = [customer.address, customer.city, customer.state, customer.pincode].filter(Boolean).join(", ") || "Not provided";
+  const addressList = [
+    customer.address,
+    customer.landmark ? `Landmark: ${customer.landmark}` : null,
+    customer.city,
+    customer.state,
+    customer.pincode ? `- ${customer.pincode}` : null,
+  ].filter(Boolean);
+  const fullAddress = addressList.length > 0 ? addressList.join(", ") : "Not provided";
 
   const itemsTable = renderItemsHtml(items);
 
@@ -246,6 +263,10 @@ export async function sendOwnerNewOrderEmail(orderId, orderData) {
                   <tr>
                     <td style="padding: 4px 0; color: #64748b;">Subtotal:</td>
                     <td style="padding: 4px 0; color: #0f172a; text-align: right;">₹${subtotal}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 4px 0; color: #64748b;">Delivery / Shipping:</td>
+                    <td style="padding: 4px 0; color: ${shipping === 0 ? '#16a34a' : '#0f172a'}; text-align: right; font-weight: ${shipping === 0 ? '700' : '400'};">${shipping === 0 ? 'FREE' : `₹${shipping}`}</td>
                   </tr>
                   ${discount > 0 ? `
                     <tr>

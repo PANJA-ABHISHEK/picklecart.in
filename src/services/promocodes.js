@@ -128,10 +128,45 @@ export async function validatePromoCode(code, cartTotal) {
         code: promo.code,
         discountAmount,
         type: promo.discountType,
-        value: promo.discountValue
+        value: promo.discountValue,
+        minOrderValue: promo.minOrderValue || 0,
+        maxDiscount: promo.maxDiscount || 0,
       }
     };
   } catch (error) {
     return { valid: false, error: "Failed to validate promo code." };
   }
 }
+
+export async function getActivePromoCodes() {
+  try {
+    if (!adminDb) return [];
+    const snapshot = await adminDb.collection("promocodes")
+      .where("isActive", "==", true)
+      .get();
+    
+    const now = new Date();
+    return snapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        code: doc.data().code,
+        discountType: doc.data().discountType,
+        discountValue: doc.data().discountValue,
+        minOrderValue: doc.data().minOrderValue || 0,
+        maxDiscount: doc.data().maxDiscount || 0,
+        expiryDate: doc.data().expiryDate || null,
+        description: doc.data().description || null,
+        timesUsed: doc.data().timesUsed || 0,
+        usageLimit: doc.data().usageLimit || null,
+      }))
+      .filter(promo => {
+        if (promo.expiryDate && new Date(promo.expiryDate) < now) return false;
+        if (promo.usageLimit && promo.timesUsed >= promo.usageLimit) return false;
+        return true;
+      });
+  } catch (error) {
+    console.error("Error fetching active promo codes:", error);
+    return [];
+  }
+}
+

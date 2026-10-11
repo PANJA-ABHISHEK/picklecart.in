@@ -24,7 +24,7 @@ export default async function SouthIndianPage() {
       regions={southRegions}
       categories={CATEGORIES}
       regionFilter={null}
-      bgImage="/southindianpagebackground.png"
+      bgImage="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740866/picklecart_assets/southindianpagebackground.png"
       showRegionFilter
       allProducts={allProducts}
     />

@@ -22,13 +22,14 @@ export default function AdminLogin() {
     try {
       const result = await loginAdmin(username, password);
       if (result.success) {
-        router.push("/admin/products");
+        window.location.href = "/admin/products";
       } else {
         setError(result.error || "Invalid username or password.");
         setIsSubmitting(false);
       }
     } catch (err) {
-      setError("An error occurred during login.");
+      console.error("Login error:", err);
+      setError("An error occurred during login. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -59,7 +60,7 @@ export default function AdminLogin() {
         <div className="p-8 sm:p-10">
           <div className="flex justify-center mb-8">
             <Image
-              src="/logo.png"
+              src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740885/picklecart_assets/logo.png"
               alt="PickleCart"
               width={180}
               height={60}

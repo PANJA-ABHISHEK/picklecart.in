@@ -46,8 +46,8 @@ export const REGIONS = [
     shortDescription: "Bold, spicy, and fiery flavours from the heartland of Andhra Pradesh.",
     description:
       "Andhra Pradesh is renowned for its bold, fiery cuisine. Our Andhra Delights collection brings you authentic avakaya, gongura pickles, and spice-packed podis made the traditional way.",
-    image: "/picklecartimg4.png",
-    cardImage: "/AndhraPradeshregionhome.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740847/picklecart_assets/picklecartimg4.png",
+    cardImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740856/picklecart_assets/AndhraPradeshregionhome.png",
     parentRoute: "/south-indian",
   },
   {
@@ -57,8 +57,8 @@ export const REGIONS = [
     shortDescription: "Rich, rustic, and deeply rooted in Telangana's food heritage.",
     description:
       "Telangana's cuisine is rich with rustic flavours and traditional recipes passed down through generations. Discover authentic pickles and podis from the Deccan heartland.",
-    image: "/picklecartimg2.png",
-    cardImage: "/Telanganaregionhome.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740844/picklecart_assets/picklecartimg2.png",
+    cardImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740857/picklecart_assets/Telanganaregionhome.png",
     parentRoute: "/south-indian",
   },
   {
@@ -68,8 +68,8 @@ export const REGIONS = [
     shortDescription: "Unique flavours from Karnataka's diverse culinary traditions.",
     description:
       "Karnataka offers a diverse palette of flavours, from tangy mango thokku to aromatic curry leaf podis. Explore our carefully curated selection of Karnataka's finest.",
-    image: "/picklecartimg1.png",
-    cardImage: "/karnatakaregionhome.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740843/picklecart_assets/picklecartimg1.png",
+    cardImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740858/picklecart_assets/karnatakaregionhome.png",
     parentRoute: "/south-indian",
   },
   {
@@ -79,8 +79,8 @@ export const REGIONS = [
     shortDescription: "Time-honoured recipes from Tamil Nadu's rich culinary legacy.",
     description:
       "Tamil Nadu's culinary traditions are steeped in history and flavour. From classic vadu mangai to aromatic milagai podi, experience the taste of authentic Tamil Nadu.",
-    image: "/picklecartimg5.png",
-    cardImage: "/Tamilnaduregionhome.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740848/picklecart_assets/picklecartimg5.png",
+    cardImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740859/picklecart_assets/Tamilnaduregionhome.png",
     parentRoute: "/south-indian",
   },
   {
@@ -90,8 +90,8 @@ export const REGIONS = [
     shortDescription: "Hearty, aromatic pickles from North India's vibrant food culture.",
     description:
       "North Indian pickles are known for their bold mustard oil base and aromatic spice blends. Discover our selection of classic aam ka achaar, mixed pickle, and more.",
-    image: "/images/regions/north-india.jpg",
-    cardImage: "/NorthIndia.png",
+    image: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740865/picklecart_assets/northindianpagebackground.png",
+    cardImage: "https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740860/picklecart_assets/NorthIndia.png",
     parentRoute: null,
   },
 ];
@@ -176,3 +176,88 @@ export const INDIAN_STATES = [
   "Delhi", "Jammu & Kashmir", "Ladakh",
   "Chandigarh", "Puducherry", "Andaman & Nicobar Islands",
 ];
+
+/* ── Announcement Bar Theme Colors (Curated Lighter & Vibrant Tones) ── */
+export const ANNOUNCEMENT_COLORS = [
+  { 
+    id: "terracotta", 
+    label: "Warm Terracotta (Lighter Red)", 
+    hex: "#B84A32",
+    tailwind: "bg-[#B84A32]" 
+  },
+  { 
+    id: "cinnamon", 
+    label: "Warm Cinnamon (Light Earthy Brown)", 
+    hex: "#8D5A36",
+    tailwind: "bg-[#8D5A36]" 
+  },
+  { 
+    id: "green", 
+    label: "Fresh Herbal Green (Lighter Green)", 
+    hex: "#4B7D2A",
+    tailwind: "bg-[#4B7D2A]" 
+  },
+  { 
+    id: "spice-red", 
+    label: "Bright Pickle Red", 
+    hex: "#D24D36",
+    tailwind: "bg-[#D24D36]" 
+  },
+  { 
+    id: "gold", 
+    label: "Golden Turmeric (Warm Amber)", 
+    hex: "#DF9724",
+    tailwind: "bg-[#DF9724]" 
+  },
+  { 
+    id: "saffron", 
+    label: "Festive Saffron (Light Orange)", 
+    hex: "#E07328",
+    tailwind: "bg-[#E07328]" 
+  },
+  { 
+    id: "hazelnut", 
+    label: "Soft Hazelnut (Lighter Charcoal)", 
+    hex: "#705845",
+    tailwind: "bg-[#705845]" 
+  },
+  { 
+    id: "cream", 
+    label: "Parchment Cream (Soft Light Banner)", 
+    hex: "#F5E6CC",
+    tailwind: "bg-[#F5E6CC]" 
+  },
+];
+
+/**
+ * Resolves any announcement background color value (including legacy dark classes)
+ * to its corresponding lighter hex and class name.
+ */
+export function resolveAnnouncementBg(bgValue) {
+  if (!bgValue) return { hex: "#B84A32", className: "bg-[#B84A32]" };
+
+  // Legacy dark mappings automatically softened to lighter tones
+  const legacyMap = {
+    "bg-[#8C2D19]": { hex: "#B84A32", className: "bg-[#B84A32]" },
+    "bg-earthy-brown": { hex: "#8D5A36", className: "bg-[#8D5A36]" },
+    "bg-heritage-green": { hex: "#4B7D2A", className: "bg-[#4B7D2A]" },
+    "bg-pickle-red": { hex: "#D24D36", className: "bg-[#D24D36]" },
+    "bg-turmeric-gold": { hex: "#DF9724", className: "bg-[#DF9724]" },
+    "bg-charcoal": { hex: "#705845", className: "bg-[#705845]" },
+  };
+
+  if (legacyMap[bgValue]) {
+    return legacyMap[bgValue];
+  }
+
+  const found = ANNOUNCEMENT_COLORS.find(c => c.hex === bgValue || c.tailwind === bgValue);
+  if (found) {
+    return { hex: found.hex, className: found.tailwind };
+  }
+
+  if (bgValue.startsWith("#")) {
+    return { hex: bgValue, className: "" };
+  }
+
+  return { hex: null, className: bgValue };
+}

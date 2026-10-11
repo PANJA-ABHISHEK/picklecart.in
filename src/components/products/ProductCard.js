@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Star, ShoppingBag, Heart, Check } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
+import Image from "next/image";
 import Badge from "@/components/ui/Badge";
 import { resolveImage } from "@/services/images";
 
@@ -60,11 +61,13 @@ export default function ProductCard({ product, className = "" }) {
 
       {/* Image */}
       <Link href={`/product/${product.slug || product.id}`} className="block relative aspect-square overflow-hidden bg-cream-dark">
-        <div
-          className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-          style={{ backgroundImage: `url(${imageUrl})` }}
-          role="img"
-          aria-label={product.name}
+        <Image
+          src={imageUrl}
+          alt={product.name}
+          fill
+          loading="lazy"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
 

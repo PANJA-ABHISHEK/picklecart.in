@@ -31,7 +31,7 @@ export default function AdminWrapper({ children }) {
         {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b border-border-light p-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
           <Link href="/" className="relative h-8 w-32 block">
-            <Image src="/logo.png" alt="PickleCart" fill className="object-contain object-left" />
+            <Image src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740885/picklecart_assets/logo.png" alt="PickleCart" fill className="object-contain object-left" />
           </Link>
           <button 
             onClick={() => setMobileMenuOpen(true)} 

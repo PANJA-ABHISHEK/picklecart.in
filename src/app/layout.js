@@ -8,6 +8,7 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import BackToTop from "@/components/common/BackToTop";
 import WhatsAppButton from "@/components/common/WhatsAppButton";
 import AOSInit from "@/components/common/AOSInit";
+import { getStoreSettings } from "@/services/settings";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -49,13 +50,20 @@ export const metadata = {
     follow: true,
   },
   icons: {
-    icon: "/Picklecart Favicon.png",
-    shortcut: "/Picklecart Favicon.png",
-    apple: "/Picklecart Favicon.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/Picklecart Favicon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const storeSettings = await getStoreSettings();
+  const announcement = storeSettings?.announcement || null;
+
   return (
     <html
       lang="en"
@@ -65,7 +73,7 @@ export default function RootLayout({ children }) {
         <CartProvider>
           <AOSInit />
           <Suspense fallback={<div className="h-20 bg-white border-b" />}>
-            <Navbar />
+            <Navbar announcement={announcement} />
           </Suspense>
           <main className="flex-1">{children}</main>
           <Suspense fallback={null}>

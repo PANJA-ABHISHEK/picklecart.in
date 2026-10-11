@@ -43,9 +43,10 @@ export default function Footer() {
             <Link href="/" className="inline-block mb-3">
               <div className="relative h-12 w-48 mb-2 transition-opacity hover:opacity-100 opacity-90">
                 <Image
-                  src="/footerlogo.png"
+                  src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740886/picklecart_assets/footerlogo.png"
                   alt={`${SITE_NAME} Logo`}
                   fill
+                  loading="lazy"
                   className="object-contain object-left"
                 />
               </div>

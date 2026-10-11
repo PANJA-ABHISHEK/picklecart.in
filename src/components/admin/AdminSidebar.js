@@ -60,7 +60,7 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen }) {
             title="Go to Live Website"
           >
             <Image
-              src="/logo.png"
+              src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740885/picklecart_assets/logo.png"
               alt="PickleCart Official Logo"
               fill
               className="object-contain"

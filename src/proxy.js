@@ -13,6 +13,14 @@ export function proxy(request) {
       return NextResponse.redirect(loginUrl);
     }
   }
+
+  // If already authenticated and visiting /admin/login, redirect directly to dashboard
+  if (pathname === "/admin/login") {
+    const sessionCookie = request.cookies.get("picklecart_admin_session");
+    if (sessionCookie && sessionCookie.value === "authenticated") {
+      return NextResponse.redirect(new URL("/admin/products", request.url));
+    }
+  }
   
   return NextResponse.next();
 }

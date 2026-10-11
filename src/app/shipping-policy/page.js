@@ -16,7 +16,7 @@ export default function ShippingPolicyPage() {
           <h2 className="font-display text-xl font-bold text-charcoal">Delivery Times</h2>
           <p>Orders are dispatched within 1–2 business days. Standard delivery takes 4–7 business days depending on your location.</p>
           <h2 className="font-display text-xl font-bold text-charcoal">Shipping Charges</h2>
-          <p>Shipping charges are calculated at checkout based on your location and order value. Free shipping may be available for orders above a certain value.</p>
+          <p>Standard delivery charge is ₹99 per order. We provide <strong>FREE Delivery</strong> on all orders above ₹1,500 across India!</p>
         </div>
       </div>
     </div>

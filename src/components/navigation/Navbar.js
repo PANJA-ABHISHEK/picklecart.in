@@ -11,7 +11,7 @@ import MobileDrawer from "./MobileDrawer";
 import SearchModal from "./SearchModal";
 import AnnouncementBar from "./AnnouncementBar";
 
-export default function Navbar() {
+export default function Navbar({ announcement }) {
   const pathname = usePathname();
   const { itemCount, toggleDrawer } = useCart();
   const [scrolled, setScrolled] = useState(false);
@@ -22,8 +22,29 @@ export default function Navbar() {
   const dropdownRef = useRef(null);
   const dropdownTimeoutRef = useRef(null);
 
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Keep spacer perfectly synced to real header height
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const updateHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(headerRef.current);
+    window.addEventListener("resize", updateHeight);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
   }, []);
 
   // Track scroll for navbar style change
@@ -72,30 +93,32 @@ export default function Navbar() {
   return (
     <>
       <header
+        ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex flex-col ${scrolled
             ? "bg-cream/95 backdrop-blur-md shadow-md"
             : "bg-cream"
           }`}
       >
-        <AnnouncementBar />
+        <AnnouncementBar initialAnnouncement={announcement} />
         {/* Top accent line */}
         <div className="h-0.5 bg-gradient-to-r from-heritage-green via-pickle-red to-turmeric-gold shrink-0" />
 
         <div className="container-main shrink-0">
-          <nav className="flex items-center justify-between h-16 md:h-18" aria-label="Main navigation">
+          <nav className="flex items-center justify-between h-[58px] md:h-[66px]" aria-label="Main navigation">
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-2 shrink-0 group"
+              className="flex items-center shrink-0 group"
               aria-label={`${SITE_NAME} — Home`}
             >
-              <div className="relative h-12 w-48 shrink-0 transition-transform duration-300 group-hover:scale-105">
+              <div className="relative h-[46px] w-[145px] sm:h-[50px] sm:w-[155px] md:h-[56px] md:w-[175px] lg:h-[60px] lg:w-[190px] xl:h-[62px] xl:w-[195px] shrink-0 transition-transform duration-300 group-hover:scale-105">
                 <Image
-                  src="/logo.png"
+                  src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740885/picklecart_assets/logo.png"
                   alt={`${SITE_NAME} Logo`}
                   fill
                   className="object-contain object-left"
                   priority
+                  sizes="(max-width: 640px) 145px, (max-width: 768px) 155px, (max-width: 1024px) 175px, 195px"
                 />
               </div>
             </Link>
@@ -200,7 +223,10 @@ export default function Navbar() {
       </header>
 
       {/* Spacer for fixed navbar */}
-      <div className="h-[calc(4rem+2px)] md:h-[calc(4.5rem+2px)]" />
+      <div
+        style={headerHeight ? { height: `${headerHeight}px` } : undefined}
+        className={headerHeight ? "" : (announcement ? "h-[94px] md:h-[104px]" : "h-[60px] md:h-[68px]")}
+      />
 
       {/* Mobile Drawer */}
       <MobileDrawer isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />

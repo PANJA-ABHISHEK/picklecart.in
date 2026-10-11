@@ -68,11 +68,12 @@ export default function MobileDrawer({ isOpen, onClose }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-border">
-          <div className="relative h-10 w-40">
+          <div className="relative h-[40px] w-[130px]">
             <Image
-              src="/logo.png"
+              src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740885/picklecart_assets/logo.png"
               alt={`${SITE_NAME} Logo`}
               fill
+              loading="lazy"
               className="object-contain object-left"
             />
           </div>

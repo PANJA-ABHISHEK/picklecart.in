@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer, useEffect, useCallback } from "react";
+import { createContext, useContext, useReducer, useEffect, useState, useCallback } from "react";
 import { safeJsonParse, isClient } from "@/lib/utils";
 
 /* ── Constants ── */
@@ -155,6 +155,11 @@ const CartContext = createContext(null);
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
+  const [shippingConfig, setShippingConfig] = useState({
+    defaultFee: 99,
+    freeThreshold: 1500,
+  });
+
   // Hydrate from localStorage on mount
   useEffect(() => {
     const savedData = loadCart();
@@ -162,6 +167,29 @@ export function CartProvider({ children }) {
     if (savedData.promo) {
       dispatch({ type: ACTIONS.SET_PROMO, payload: savedData.promo });
     }
+  }, []);
+
+  // Fetch live store shipping settings on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchSettings() {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data?.settings?.shipping) {
+            setShippingConfig({
+              defaultFee: Number(data.settings.shipping.defaultFee) >= 0 ? Number(data.settings.shipping.defaultFee) : 99,
+              freeThreshold: Number(data.settings.shipping.freeThreshold) >= 0 ? Number(data.settings.shipping.freeThreshold) : 1500,
+            });
+          }
+        }
+      } catch (err) {
+        // Fallback to default 99 & 1500
+      }
+    }
+    fetchSettings();
+    return () => { isMounted = false; };
   }, []);
 
   // Persist to localStorage on change
@@ -197,7 +225,16 @@ export function CartProvider({ children }) {
     }
   }
 
-  const total = subtotal - discountAmount;
+  // Shipping calculation:
+  // Dynamically configured from store settings (defaults: ₹99, Free >= ₹1500)
+  const FREE_SHIPPING_THRESHOLD = shippingConfig.freeThreshold;
+  const DEFAULT_SHIPPING_FEE = shippingConfig.defaultFee;
+  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0;
+  const shippingFee = isFreeShipping ? 0 : DEFAULT_SHIPPING_FEE;
+  const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+  const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
+
+  const total = Math.max(0, subtotal - discountAmount + shippingFee);
 
   /* ── Actions ── */
   const addItem = useCallback(
@@ -235,6 +272,12 @@ export function CartProvider({ children }) {
     appliedPromo: state.appliedPromo,
     isPromoValid,
     discountAmount,
+    shippingFee,
+    defaultShippingFee: DEFAULT_SHIPPING_FEE,
+    isFreeShipping,
+    freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+    amountNeededForFreeShipping,
+    freeShippingProgress,
     total,
     itemCount,
     subtotal,

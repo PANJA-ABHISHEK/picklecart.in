@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  devIndicators: false,
   serverExternalPackages: ["firebase-admin", "@google-cloud/firestore"],
   turbopack: {
     rules: {
