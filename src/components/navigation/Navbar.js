@@ -4,11 +4,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { ShoppingBag, Search, Menu, X, ChevronDown } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, ChevronDown } from "lucide-react";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { useCart } from "@/contexts/CartContext";
 import MobileDrawer from "./MobileDrawer";
 import SearchModal from "./SearchModal";
+import AnnouncementBar from "./AnnouncementBar";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -17,8 +18,13 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef(null);
   const dropdownTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Track scroll for navbar style change
   useEffect(() => {
@@ -59,18 +65,23 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex flex-col ${scrolled
             ? "bg-cream/95 backdrop-blur-md shadow-md"
             : "bg-cream"
           }`}
       >
+        <AnnouncementBar />
         {/* Top accent line */}
-        <div className="h-0.5 bg-gradient-to-r from-heritage-green via-pickle-red to-turmeric-gold" />
+        <div className="h-0.5 bg-gradient-to-r from-heritage-green via-pickle-red to-turmeric-gold shrink-0" />
 
-        <div className="container-main">
+        <div className="container-main shrink-0">
           <nav className="flex items-center justify-between h-16 md:h-18" aria-label="Main navigation">
             {/* Logo */}
             <Link
@@ -164,11 +175,11 @@ export default function Navbar() {
               {/* Cart */}
               <button
                 onClick={toggleDrawer}
-                aria-label={`Shopping cart, ${itemCount} items`}
+                aria-label={`Shopping cart, ${mounted ? itemCount : 0} items`}
                 className="relative cursor-pointer p-2 text-charcoal-light hover:text-charcoal transition-colors duration-200 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage-green"
               >
-                <ShoppingBag size={20} />
-                {itemCount > 0 && (
+                <ShoppingCart size={20} />
+                {mounted && itemCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-pickle-red text-white text-[10px] font-body font-bold rounded-full flex items-center justify-center leading-none animate-[scaleIn_0.2s_ease-out]">
                     {itemCount > 99 ? "99+" : itemCount}
                   </span>

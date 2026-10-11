@@ -2,9 +2,12 @@ import { getBestSellingProducts } from "@/services/products";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ProductCard from "@/components/products/ProductCard";
 import Button from "@/components/ui/Button";
+import { connection } from "next/server";
 
-export default function BestSellers() {
-  const bestSellers = getBestSellingProducts().slice(0, 8);
+export default async function BestSellers() {
+  await connection();
+  const bestSellersFull = await getBestSellingProducts();
+  const bestSellers = bestSellersFull.slice(0, 8);
 
   return (
     <section className="section-padding bg-cream" aria-label="Best selling products">

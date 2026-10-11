@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Star, ShoppingBag, Minus, Plus, ChevronRight, Truck, Shield, RotateCcw } from "lucide-react";
+import { Star, ShoppingCart, Minus, Plus, ChevronRight, Truck, Shield, RotateCcw } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Button from "@/components/ui/Button";
@@ -16,12 +17,16 @@ export default function ProductDetailContent({
   regionNames,
   categoryNames,
 }) {
+  const router = useRouter();
   const { addItem, openDrawer } = useCart();
-  const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+  const variants = product.pricing || product.variants || [];
+  const [selectedVariant, setSelectedVariant] = useState(variants[0] || { price: 0, label: "Default", id: "default" });
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
+
+  const isOutOfStock = product.inStock === false && !selectedVariant?.inStock;
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -29,9 +34,9 @@ export default function ProductDetailContent({
         productId: product.id,
         variantId: selectedVariant.id,
         name: product.name,
-        variantLabel: selectedVariant.label,
+        variantLabel: selectedVariant.weight || selectedVariant.label || "Default",
         price: selectedVariant.price,
-        image: product.images?.[0] || null,
+        image: product.image || product.images?.[0] || null,
       });
     }
     setIsAdding(true);
@@ -41,7 +46,28 @@ export default function ProductDetailContent({
     }, 500);
   };
 
-  const mainImage = resolveImage(product.images?.[selectedImageIndex], { width: 800, height: 800, text: product.name });
+  const handleBuyNow = () => {
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        productId: product.id,
+        variantId: selectedVariant.id,
+        name: product.name,
+        variantLabel: selectedVariant.weight || selectedVariant.label || "Default",
+        price: selectedVariant.price,
+        image: product.image || product.images?.[0] || null,
+      });
+    }
+    router.push("/checkout");
+  };
+
+  const productImg = product.image || product.images?.[selectedImageIndex] || null;
+  const mainImage = resolveImage(productImg, { width: 800, height: 800, text: product.name });
+
+  const compareAtPrice = selectedVariant.originalPrice || product.compareAtPrice;
+  const hasDiscount = compareAtPrice && compareAtPrice > selectedVariant.price;
+  const discountPercentage = hasDiscount 
+    ? Math.round(((compareAtPrice - selectedVariant.price) / compareAtPrice) * 100)
+    : (product.discountPercentage || 0);
 
   return (
     <div className="bg-warm-white min-h-screen">
@@ -62,9 +88,9 @@ export default function ProductDetailContent({
         {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Image Gallery */}
-          <div>
+          <div className="lg:max-w-xl mx-auto w-full">
             {/* Main Image */}
-            <div className="aspect-square rounded-sm overflow-hidden bg-cream-dark mb-3">
+            <div className="w-full aspect-square rounded-3xl overflow-hidden bg-cream-dark mb-4 shadow-sm border border-black/5">
               <div
                 className="w-full h-full bg-cover bg-center"
                 style={{ backgroundImage: `url(${mainImage})` }}
@@ -82,7 +108,7 @@ export default function ProductDetailContent({
                     <button
                       key={i}
                       onClick={() => setSelectedImageIndex(i)}
-                      className={`w-16 h-16 rounded-sm overflow-hidden border-2 transition-all ${
+                      className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                         selectedImageIndex === i
                           ? "border-heritage-green"
                           : "border-border hover:border-charcoal-muted"
@@ -101,12 +127,12 @@ export default function ProductDetailContent({
           </div>
 
           {/* Product Info */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="lg:py-4">
             {/* Badges */}
             <div className="flex gap-2 mb-3">
               {product.bestSeller && <Badge variant="bestseller">Bestseller</Badge>}
-              {product.discountPercentage > 0 && (
-                <Badge variant="discount">{product.discountPercentage}% Off</Badge>
+              {discountPercentage > 0 && (
+                <Badge variant="discount">{discountPercentage}% Off</Badge>
               )}
             </div>
 
@@ -121,63 +147,40 @@ export default function ProductDetailContent({
             </div>
 
             {/* Product Name */}
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-charcoal leading-tight">
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-charcoal leading-tight tracking-tight">
               {product.name}
             </h1>
 
-            {/* Rating */}
-            {product.rating > 0 && (
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={
-                        i < Math.floor(product.rating)
-                          ? "fill-turmeric-gold text-turmeric-gold"
-                          : "text-charcoal-muted/20"
-                      }
-                    />
-                  ))}
-                </div>
-                <span className="text-sm font-body text-charcoal-muted">
-                  {product.rating} ({product.reviewCount} reviews)
-                </span>
-              </div>
-            )}
+            {/* Removed Rating per user request */}
 
-            {/* Short description */}
-            <p className="font-body text-charcoal-light mt-3 leading-relaxed">
-              {product.shortDescription}
-            </p>
+
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mt-4">
-              <span className="text-2xl font-display font-bold text-charcoal">
+              <span className="text-3xl font-display font-bold text-charcoal">
                 {formatPrice(selectedVariant.price)}
               </span>
-              {product.compareAtPrice && (
+              {compareAtPrice && (
                 <span className="text-lg font-body text-charcoal-muted line-through">
-                  {formatPrice(product.compareAtPrice)}
+                  {formatPrice(compareAtPrice)}
                 </span>
               )}
-              {product.discountPercentage > 0 && (
-                <span className="text-sm font-body font-semibold text-pickle-red">
-                  Save {product.discountPercentage}%
+              {discountPercentage > 0 && (
+                <span className="text-sm font-body font-semibold text-pickle-red px-2 py-1 bg-red-50 rounded-md">
+                  Save {discountPercentage}%
                 </span>
               )}
             </div>
 
             {/* Variants */}
-            <div className="mt-5">
+            <div className="mt-6 pt-6 border-t border-gray-100">
               <p className="text-sm font-body font-medium text-charcoal mb-2">
                 Size / Weight
               </p>
               <div className="flex flex-wrap gap-2">
-                {product.variants.map((v) => (
+                {variants.map((v, idx) => (
                   <button
-                    key={v.id}
+                    key={v.id || idx}
                     onClick={() => setSelectedVariant(v)}
                     className={`px-4 py-2 text-sm font-body rounded-sm border-2 transition-all duration-200 ${
                       selectedVariant.id === v.id
@@ -185,7 +188,7 @@ export default function ProductDetailContent({
                         : "border-border text-charcoal-light hover:border-charcoal-muted"
                     }`}
                   >
-                    {v.label}
+                    {v.weight || v.label}
                   </button>
                 ))}
               </div>
@@ -224,15 +227,16 @@ export default function ProductDetailContent({
             <div className="flex gap-3 mt-6">
               <Button
                 onClick={handleAddToCart}
-                disabled={!product.inStock || isAdding}
+                disabled={isOutOfStock || isAdding}
                 size="lg"
                 className="flex-1"
               >
-                <ShoppingBag size={18} className="mr-2" />
+                <ShoppingCart size={18} className="mr-2" />
                 {isAdding ? "Added to Cart!" : "Add to Cart"}
               </Button>
               <Button
-                href="/checkout"
+                onClick={handleBuyNow}
+                disabled={isOutOfStock}
                 variant="outline"
                 size="lg"
                 className="flex-1"
@@ -242,67 +246,81 @@ export default function ProductDetailContent({
             </div>
 
             {/* Trust indicators */}
-            <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-border">
+            <div className="grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-border">
               <div className="text-center">
-                <Truck size={18} className="mx-auto text-heritage-green mb-1" />
-                <p className="text-xs font-body text-charcoal-muted">Pan-India Delivery</p>
+                <div className="w-10 h-10 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-2">
+                  <Truck size={18} className="text-heritage-green" />
+                </div>
+                <p className="text-xs font-body text-charcoal-muted font-medium">Pan-India Delivery</p>
               </div>
               <div className="text-center">
-                <Shield size={18} className="mx-auto text-heritage-green mb-1" />
-                <p className="text-xs font-body text-charcoal-muted">Quality Assured</p>
+                <div className="w-10 h-10 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-2">
+                  <Shield size={18} className="text-heritage-green" />
+                </div>
+                <p className="text-xs font-body text-charcoal-muted font-medium">Quality Assured</p>
               </div>
               <div className="text-center">
-                <RotateCcw size={18} className="mx-auto text-heritage-green mb-1" />
-                <p className="text-xs font-body text-charcoal-muted">Easy Returns</p>
+                <div className="w-10 h-10 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-2">
+                  <RotateCcw size={18} className="text-heritage-green" />
+                </div>
+                <p className="text-xs font-body text-charcoal-muted font-medium">Easy Returns</p>
               </div>
             </div>
+
+
           </div>
         </div>
 
-        {/* Product Tabs */}
-        <div className="mt-12 md:mt-16 border-t border-border pt-8">
-          <div className="flex gap-6 mb-6 border-b border-border">
-            {["description", "ingredients", "storage", "shipping"].map((tab) => (
+        {/* Extended Details Section (Premium Tabs) */}
+        <div className="mt-12 md:mt-16 pt-10 border-t border-border w-full flex flex-col items-center">
+          
+          {/* Tab Controls (Pill Style) */}
+          <div className="flex w-full bg-cream p-2 rounded-full mb-8 border border-border-light shadow-sm overflow-x-auto no-scrollbar">
+            {["description", "ingredients", "shipping"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 text-sm font-body font-medium capitalize transition-colors border-b-2 -mb-px ${
+                className={`flex-1 py-3 px-4 rounded-full text-sm md:text-base font-display font-bold capitalize transition-all duration-300 whitespace-nowrap text-center ${
                   activeTab === tab
-                    ? "border-heritage-green text-heritage-green"
-                    : "border-transparent text-charcoal-muted hover:text-charcoal"
+                    ? "bg-white text-heritage-green shadow-sm"
+                    : "text-charcoal-muted hover:text-charcoal"
                 }`}
               >
-                {tab === "storage" ? "Storage & Shelf Life" : tab}
+                {tab}
               </button>
             ))}
           </div>
 
-          <div className="max-w-3xl">
+          {/* Tab Content Box */}
+          <div className="w-full bg-cream/30 p-6 md:p-10 rounded-3xl border border-border-light min-h-[250px]">
             {activeTab === "description" && (
-              <p className="font-body text-charcoal-light leading-relaxed">
-                {product.description}
-              </p>
+              <div className="animate-in fade-in duration-300">
+                <h3 className="font-display text-2xl font-bold text-charcoal mb-4">About this Product</h3>
+                <div className="font-body text-charcoal-light text-base md:text-lg leading-relaxed whitespace-pre-line break-words">
+                  {product.description}
+                </div>
+              </div>
             )}
+
             {activeTab === "ingredients" && (
-              <p className="font-body text-charcoal-light leading-relaxed">
-                {product.ingredients || "Ingredients information will be available soon."}
-              </p>
-            )}
-            {activeTab === "storage" && (
-              <div className="space-y-3">
-                <p className="font-body text-charcoal-light">
-                  <strong className="text-charcoal">Storage:</strong> {product.storageInfo}
-                </p>
-                <p className="font-body text-charcoal-light">
-                  <strong className="text-charcoal">Shelf Life:</strong> {product.shelfLife}
+              <div className="animate-in fade-in duration-300">
+                <h3 className="font-display text-2xl font-bold text-charcoal mb-4">Ingredients</h3>
+                <p className="font-body text-charcoal-light text-base md:text-lg leading-relaxed break-words">
+                  {product.ingredients 
+                    ? (Array.isArray(product.ingredients) ? product.ingredients.join(", ") : product.ingredients)
+                    : "No ingredients information provided."}
                 </p>
               </div>
             )}
+
             {activeTab === "shipping" && (
-              <div className="space-y-3 font-body text-charcoal-light">
-                <p>We deliver across India. Orders are typically dispatched within 1–2 business days.</p>
-                <p>Standard delivery takes 4–7 business days depending on your location.</p>
-                <p>You will receive tracking information via email once your order is shipped.</p>
+              <div className="animate-in fade-in duration-300">
+                <h3 className="font-display text-2xl font-bold text-charcoal mb-4">Shipping Information</h3>
+                <div className="space-y-3 font-body text-charcoal-light text-base md:text-lg leading-relaxed">
+                  <p>We deliver across India. Orders are typically dispatched within 1–2 business days.</p>
+                  <p>Standard delivery takes 4–7 business days depending on your location.</p>
+                  <p>You will receive tracking information via email once your order is shipped.</p>
+                </div>
               </div>
             )}
           </div>

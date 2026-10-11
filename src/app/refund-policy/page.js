@@ -12,7 +12,7 @@ export default function RefundPolicyPage() {
         <div className="prose prose-sm font-body text-charcoal-light space-y-6">
           <p>We want you to be completely satisfied with your PickleCart purchase.</p>
           <h2 className="font-display text-xl font-bold text-charcoal">Cancellation</h2>
-          <p>Orders can be cancelled within 24 hours of placement, provided they have not been dispatched. Please contact us at hello@picklecart.in to request a cancellation.</p>
+          <p>Orders can be cancelled within 24 hours of placement, provided they have not been dispatched. Please contact us at picklecartblr@gmail.com to request a cancellation.</p>
           <h2 className="font-display text-xl font-bold text-charcoal">Refunds</h2>
           <p>If you receive a damaged or incorrect product, please contact us within 48 hours of delivery with photos. We will arrange a replacement or refund.</p>
           <h2 className="font-display text-xl font-bold text-charcoal">Returns</h2>

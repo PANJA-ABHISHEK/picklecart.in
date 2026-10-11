@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scratch / test scripts
+find_unused_images.js
+reset_orders.js
+test-email.js

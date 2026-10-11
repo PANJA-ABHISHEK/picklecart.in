@@ -11,11 +11,16 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "aos": "^2.3.4",
+    "cloudinary": "^2.11.0",
+    "firebase": "^13.0.0",
+    "firebase-admin": "^14.5.0",
     "gsap": "^3.15.0",
     "lucide-react": "^1.53.0",
     "next": "16.4.0",
+    "razorpay": "^2.9.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "resend": "^6.32.1",
     "swiper": "^14.3.0"
   },
   "devDependencies": {

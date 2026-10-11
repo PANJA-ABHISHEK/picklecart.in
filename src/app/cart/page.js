@@ -1,13 +1,49 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Tag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Button from "@/components/ui/Button";
+import { resolveImage } from "@/services/images";
+import { validatePromoCode } from "@/services/promocodes";
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, subtotal, clearCart, itemCount } = useCart();
+  const { 
+    items, 
+    removeItem, 
+    updateQuantity, 
+    subtotal, 
+    clearCart, 
+    itemCount,
+    appliedPromo,
+    isPromoValid,
+    discountAmount,
+    total,
+    applyPromo,
+    removePromo
+  } = useCart();
+
+  const [promoInput, setPromoInput] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+
+  const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    setIsApplyingPromo(true);
+    setPromoError("");
+    
+    const result = await validatePromoCode(promoInput, subtotal);
+    if (result.valid) {
+      applyPromo(result.promo);
+      setPromoInput("");
+    } else {
+      setPromoError(result.error);
+    }
+    
+    setIsApplyingPromo(false);
+  };
 
   if (items.length === 0) {
     return (
@@ -50,14 +86,13 @@ export default function CartPage() {
             {items.map((item) => (
               <div
                 key={`${item.productId}-${item.variantId}`}
-                className="flex gap-4 p-4 bg-cream rounded-sm border border-border-light"
+                className="flex gap-4 p-4 bg-surface rounded-2xl shadow-sm border border-border-light"
               >
                 {/* Image */}
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-sm bg-cream-dark flex items-center justify-center shrink-0">
-                  <span className="text-sm text-charcoal-muted font-body">
-                    {item.name?.charAt(0) || "P"}
-                  </span>
-                </div>
+                <div 
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-cream-dark bg-cover bg-center shrink-0"
+                  style={{ backgroundImage: `url(${resolveImage(item.image, { width: 150, height: 150, text: item.name })})` }}
+                />
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
@@ -73,7 +108,7 @@ export default function CartPage() {
 
                   <div className="flex items-center justify-between mt-3">
                     {/* Quantity */}
-                    <div className="flex items-center border border-border rounded-sm">
+                    <div className="flex items-center border border-border rounded-xl">
                       <button
                         onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)}
                         aria-label="Decrease quantity"
@@ -122,23 +157,67 @@ export default function CartPage() {
 
           {/* Order Summary */}
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="bg-cream rounded-sm border border-border-light p-6">
+            <div className="bg-surface rounded-2xl shadow-sm border border-border-light p-6 md:p-8">
               <h2 className="font-display text-lg font-bold text-charcoal mb-4">
                 Order Summary
               </h2>
+
+              {/* Promo Code Section */}
+              <div className="mb-6 space-y-2">
+                {!appliedPromo || !isPromoValid ? (
+                  <div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Promo code"
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                        className="flex-1 px-3 py-2 bg-white border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-earthy-brown font-mono uppercase"
+                      />
+                      <button
+                        onClick={handleApplyPromo}
+                        disabled={isApplyingPromo || !promoInput.trim()}
+                        className="px-4 py-2 bg-earthy-brown text-white text-sm font-semibold rounded-lg hover:bg-earthy-brown-dark transition-colors disabled:opacity-50"
+                      >
+                        {isApplyingPromo ? "..." : "Apply"}
+                      </button>
+                    </div>
+                    {promoError && <p className="text-pickle-red text-xs mt-1 font-medium">{promoError}</p>}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between bg-heritage-green/10 px-3 py-2 rounded-lg border border-heritage-green/20">
+                    <div className="flex items-center gap-2 text-heritage-green">
+                      <Tag size={14} />
+                      <span className="text-sm font-bold font-mono">{appliedPromo.code}</span>
+                    </div>
+                    <button onClick={removePromo} className="text-xs text-charcoal-muted hover:text-pickle-red underline">
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <div className="space-y-3 text-sm font-body">
                 <div className="flex justify-between text-charcoal-light">
                   <span>Subtotal</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
+                
+                {appliedPromo && isPromoValid && (
+                  <div className="flex justify-between text-heritage-green font-medium">
+                    <span>Discount ({appliedPromo.code})</span>
+                    <span>-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
+                
                 <div className="flex justify-between text-charcoal-light">
                   <span>Shipping</span>
                   <span className="text-heritage-green font-medium">Calculated at checkout</span>
                 </div>
+                
                 <div className="border-t border-border pt-3 flex justify-between text-charcoal font-semibold text-base">
                   <span>Total</span>
-                  <span className="font-display font-bold">{formatPrice(subtotal)}</span>
+                  <span className="font-display font-bold">{formatPrice(total)}</span>
                 </div>
               </div>
 

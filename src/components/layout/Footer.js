@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { SITE_NAME, SITE_TAGLINE, CONTACT, NAV_LINKS, REGIONS } from "@/lib/constants";
 
@@ -23,7 +26,12 @@ const regionLinks = REGIONS.filter((r) => r.parentRoute).map((r) => ({
 }));
 
 export default function Footer() {
+  const pathname = usePathname();
   const currentYear = "2026";
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <footer className="bg-charcoal text-warm-white/80">
@@ -50,26 +58,37 @@ export default function Footer() {
               products. Handcrafted with recipes passed down through generations.
             </p>
 
-            {/* Social */}
-            <div className="flex items-center gap-3 mt-5">
+            <div className="flex items-center gap-4 mt-5">
               <a
                 href={CONTACT.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="w-9 h-9 rounded-full bg-warm-white/10 flex items-center justify-center hover:bg-warm-white/20 transition-colors"
+                className="hover:scale-110 transition-transform origin-center"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30" height="30">
+                  <radialGradient id="ig-rg" cx="30%" cy="100%" r="100%">
+                    <stop offset="0%" stopColor="#fd5" />
+                    <stop offset="10%" stopColor="#fd5" />
+                    <stop offset="50%" stopColor="#ff543e" />
+                    <stop offset="100%" stopColor="#c837ab" />
+                  </radialGradient>
+                  <path fill="url(#ig-rg)" d="M14,2h20c6.627,0,12,5.373,12,12v20c0,6.627-5.373,12-12,12H14C7.373,46,2,40.627,2,34V14C2,7.373,7.373,2,14,2z" />
+                  <path fill="#fff" d="M24,14c-5.514,0-10,4.486-10,10c0,5.514,4.486,10,10,10c5.514,0,10-4.486,10-10C34,18.486,29.514,14,24,14z M24,31 c-3.859,0-7-3.14-7-7c0-3.859,3.141-7,7-7c3.859,0,7,3.141,7,7C31,27.86,27.859,31,24,31z" />
+                  <circle fill="#fff" cx="34.5" cy="13.5" r="2.5" />
+                  <path fill="#fff" d="M34,8H14c-3.309,0-6,2.691-6,6v20c0,3.309,2.691,6,6,6h20c3.309,0,6-2.691,6-6V14C40,10.691,37.309,8,34,8z M37,34 c0,1.654-1.346,3-3,3H14c-1.654,0-3-1.346-3-3V14c0-1.654,1.346-3,3-3h20c1.654,0,3,1.346,3,3V34z" />
+                </svg>
               </a>
               <a
                 href={CONTACT.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="w-9 h-9 rounded-full bg-warm-white/10 flex items-center justify-center hover:bg-warm-white/20 transition-colors"
+                className="hover:scale-110 transition-transform origin-center"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                <svg viewBox="0 0 36 36" width="30" height="30">
+                  <path fill="#1877F2" d="M36 18c0-9.941-8.059-18-18-18S0 8.059 0 18c0 8.974 6.559 16.417 15.188 17.785v-12.58h-4.568V18h4.568v-3.963c0-4.509 2.686-7.002 6.812-7.002 1.967 0 4.025.352 4.025.352v4.426h-2.268c-2.234 0-2.934 1.386-2.934 2.812V18h5.01l-.8 5.205h-4.21v12.58C29.441 34.417 36 26.974 36 18z"/>
+                  <path fill="#ffffff" d="M25.32 23.205l.8-5.205h-5.01v-3.376c0-1.426.7-2.812 2.934-2.812h2.268V7.386s-2.058-.352-4.025-.352c-4.126 0-6.812 2.493-6.812 7.002V18h-4.568v5.205h4.568v12.58a18.156 18.156 0 005.625 0v-12.58h4.21z"/>
                 </svg>
               </a>
             </div>
@@ -164,11 +183,24 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-warm-white/10">
-        <div className="container-main py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs font-body text-warm-white/40">
-            © {currentYear} {SITE_NAME}. All rights reserved.
-          </p>
-          <div className="flex items-center gap-4">
+        <div className="container-main py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col items-center sm:items-start gap-1.5 text-center sm:text-left">
+            <p className="text-xs font-body text-warm-white/50">
+              © {currentYear} {SITE_NAME}. All rights reserved.
+            </p>
+            <p className="text-xs font-body text-warm-white/50 flex flex-wrap items-center justify-center sm:justify-start gap-1">
+              <span>Developed by</span>
+              <a href="mailto:panjaabhishek57@gmail.com" className="inline-flex items-center gap-1 font-medium text-warm-white/70 hover:text-warm-white transition-colors" title="Email Panja Abhishek">
+                Panja Abhishek <Mail size={10} />
+              </a>
+              <span>and</span>
+              <a href="mailto:bhaskarvanjarapu207@gmail.com" className="inline-flex items-center gap-1 font-medium text-warm-white/70 hover:text-warm-white transition-colors" title="Email Bhaskar Vanjarapu">
+                Bhaskar Vanjarapu <Mail size={10} />
+              </a>
+            </p>
+          </div>
+          
+          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 mt-2 sm:mt-0">
             {customerLinks.map((link) => (
               <Link
                 key={link.href}

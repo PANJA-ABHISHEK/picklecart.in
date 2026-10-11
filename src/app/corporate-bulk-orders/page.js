@@ -4,6 +4,7 @@ import { useState } from "react";
 import { REQUIREMENT_TYPES } from "@/lib/constants";
 import Button from "@/components/ui/Button";
 import { Building2, Gift, CheckCircle } from "lucide-react";
+import { submitBulkEnquiry } from "@/app/actions/enquiries";
 
 export default function CorporateBulkOrdersPage() {
   const [formData, setFormData] = useState({
@@ -28,11 +29,17 @@ export default function CorporateBulkOrdersPage() {
     return e;
   };
 
-  const handleSubmit = (ev) => {
+  const handleSubmit = async (ev) => {
     ev.preventDefault();
     const v = validate();
     if (Object.keys(v).length > 0) { setErrors(v); return; }
-    setSubmitted(true);
+    
+    const res = await submitBulkEnquiry(formData);
+    if (res.success) {
+      setSubmitted(true);
+    } else {
+      setErrors({ form: res.error });
+    }
   };
 
   return (
@@ -103,6 +110,7 @@ export default function CorporateBulkOrdersPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {errors.form && <div className="p-4 bg-red-50 text-red-600 text-sm rounded-lg mb-4 font-medium">{errors.form}</div>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Full Name" error={errors.fullName}>
                     <input type="text" value={formData.fullName} onChange={(e) => updateField("fullName", e.target.value)} className="form-input" placeholder="Your name" />

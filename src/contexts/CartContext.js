@@ -12,6 +12,7 @@ const initialState = {
   items: [],
   isDrawerOpen: false,
   isHydrated: false,
+  appliedPromo: null,
 };
 
 /* ── Action Types ── */
@@ -24,6 +25,8 @@ const ACTIONS = {
   TOGGLE_DRAWER: "TOGGLE_DRAWER",
   OPEN_DRAWER: "OPEN_DRAWER",
   CLOSE_DRAWER: "CLOSE_DRAWER",
+  SET_PROMO: "SET_PROMO",
+  REMOVE_PROMO: "REMOVE_PROMO",
 };
 
 /* ── Reducer ── */
@@ -102,6 +105,12 @@ function cartReducer(state, action) {
     case ACTIONS.CLOSE_DRAWER:
       return { ...state, isDrawerOpen: false };
 
+    case ACTIONS.SET_PROMO:
+      return { ...state, appliedPromo: action.payload };
+
+    case ACTIONS.REMOVE_PROMO:
+      return { ...state, appliedPromo: null };
+
     default:
       return state;
   }
@@ -109,31 +118,31 @@ function cartReducer(state, action) {
 
 /* ── Persistence Helpers ── */
 function loadCart() {
-  if (!isClient()) return [];
+  if (!isClient()) return { items: [], promo: null };
   try {
     const raw = localStorage.getItem(CART_STORAGE_KEY);
-    if (!raw) return [];
+    if (!raw) return { items: [], promo: null };
     const data = safeJsonParse(raw, null);
-    if (!data || data.version !== CART_VERSION || !Array.isArray(data.items)) return [];
+    if (!data || data.version !== CART_VERSION || !Array.isArray(data.items)) return { items: [], promo: null };
     // Validate each item has required fields
-    return data.items.filter(
+    const validItems = data.items.filter(
       (item) =>
         item.productId &&
-        item.variantId &&
         typeof item.quantity === "number" &&
         item.quantity > 0
     );
+    return { items: validItems, promo: data.appliedPromo || null };
   } catch {
-    return [];
+    return { items: [], promo: null };
   }
 }
 
-function saveCart(items) {
+function saveCart(state) {
   if (!isClient()) return;
   try {
     localStorage.setItem(
       CART_STORAGE_KEY,
-      JSON.stringify({ version: CART_VERSION, items })
+      JSON.stringify({ version: CART_VERSION, items: state.items, appliedPromo: state.appliedPromo })
     );
   } catch {
     // localStorage full or unavailable — fail silently
@@ -148,16 +157,19 @@ export function CartProvider({ children }) {
 
   // Hydrate from localStorage on mount
   useEffect(() => {
-    const savedItems = loadCart();
-    dispatch({ type: ACTIONS.HYDRATE, payload: savedItems });
+    const savedData = loadCart();
+    dispatch({ type: ACTIONS.HYDRATE, payload: savedData.items });
+    if (savedData.promo) {
+      dispatch({ type: ACTIONS.SET_PROMO, payload: savedData.promo });
+    }
   }, []);
 
   // Persist to localStorage on change
   useEffect(() => {
     if (state.isHydrated) {
-      saveCart(state.items);
+      saveCart(state);
     }
-  }, [state.items, state.isHydrated]);
+  }, [state.items, state.appliedPromo, state.isHydrated]);
 
   /* ── Derived Values ── */
   const itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -165,6 +177,27 @@ export function CartProvider({ children }) {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  let discountAmount = 0;
+  let isPromoValid = !!state.appliedPromo;
+  
+  if (state.appliedPromo) {
+    if (state.appliedPromo.minOrderValue && subtotal < state.appliedPromo.minOrderValue) {
+      isPromoValid = false;
+    } else {
+      if (state.appliedPromo.type === "percentage") {
+        discountAmount = (subtotal * state.appliedPromo.value) / 100;
+        if (state.appliedPromo.maxDiscount && discountAmount > state.appliedPromo.maxDiscount) {
+          discountAmount = state.appliedPromo.maxDiscount;
+        }
+      } else {
+        discountAmount = state.appliedPromo.value;
+      }
+      if (discountAmount > subtotal) discountAmount = subtotal;
+    }
+  }
+
+  const total = subtotal - discountAmount;
 
   /* ── Actions ── */
   const addItem = useCallback(
@@ -192,10 +225,17 @@ export function CartProvider({ children }) {
   const openDrawer = useCallback(() => dispatch({ type: ACTIONS.OPEN_DRAWER }), []);
   const closeDrawer = useCallback(() => dispatch({ type: ACTIONS.CLOSE_DRAWER }), []);
 
+  const applyPromo = useCallback((promo) => dispatch({ type: ACTIONS.SET_PROMO, payload: promo }), []);
+  const removePromo = useCallback(() => dispatch({ type: ACTIONS.REMOVE_PROMO }), []);
+
   const value = {
     items: state.items,
     isDrawerOpen: state.isDrawerOpen,
     isHydrated: state.isHydrated,
+    appliedPromo: state.appliedPromo,
+    isPromoValid,
+    discountAmount,
+    total,
     itemCount,
     subtotal,
     addItem,
@@ -205,6 +245,8 @@ export function CartProvider({ children }) {
     toggleDrawer,
     openDrawer,
     closeDrawer,
+    applyPromo,
+    removePromo,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

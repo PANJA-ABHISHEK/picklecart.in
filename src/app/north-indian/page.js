@@ -1,5 +1,6 @@
 import { REGIONS, CATEGORIES } from "@/lib/constants";
 import RegionPageContent from "@/components/regional/RegionPageContent";
+import { getProductsByRegion } from "@/services/products";
 
 const REGION_ID = "north-indian";
 
@@ -16,8 +17,11 @@ export const metadata = {
     "Explore authentic North Indian pickles, mixed vegetable pickle, aam ka achaar, and more — made with mustard oil and traditional spices.",
 };
 
-export default function NorthIndianPage() {
+export const instant = false;
+
+export default async function NorthIndianPage() {
   const region = REGIONS.find((r) => r.id === REGION_ID);
+  const allProducts = await getProductsByRegion(REGION_ID);
 
   return (
     <RegionPageContent
@@ -27,6 +31,7 @@ export default function NorthIndianPage() {
       categories={northCategories}
       regionFilter={REGION_ID}
       bgImage="/northindianpagebackground.png"
+      allProducts={allProducts}
     />
   );
 }

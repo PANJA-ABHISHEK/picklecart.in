@@ -4,15 +4,21 @@ import { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { Star, Quote } from "lucide-react";
-import { testimonials } from "@/lib/data/products";
+import { getTestimonials } from "@/services/testimonials";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 import "swiper/css";
 
 export default function TestimonialsSection() {
   const [mounted, setMounted] = useState(false);
+  const [testimonials, setTestimonials] = useState([]);
 
   useEffect(() => {
+    const fetchTestimonials = async () => {
+      const data = await getTestimonials();
+      setTestimonials(data);
+    };
+    fetchTestimonials();
     setMounted(true);
   }, []);
 
@@ -25,7 +31,7 @@ export default function TestimonialsSection() {
           description="Real reviews from real customers who trust PickleCart for authentic Indian food products."
         />
 
-        {mounted ? (
+        {mounted && testimonials.length > 0 ? (
           <Swiper
           modules={[Autoplay]}
           autoplay={{ delay: 5000, disableOnInteraction: false }}
@@ -40,13 +46,13 @@ export default function TestimonialsSection() {
         >
           {testimonials.map((t) => (
             <SwiperSlide key={t.id}>
-              <div className="bg-warm-white rounded-sm p-6 md:p-7 border border-border-light h-full flex flex-col">
+              <div className="bg-surface rounded-2xl p-6 md:p-7 border border-border-light shadow-sm h-full flex flex-col">
                 {/* Quote icon */}
                 <Quote size={24} className="text-turmeric-gold/30 mb-3 shrink-0" />
 
                 {/* Review text */}
                 <p className="font-body text-sm text-charcoal-light leading-relaxed flex-1">
-                  &ldquo;{t.review}&rdquo;
+                  &ldquo;{t.comment || t.review}&rdquo;
                 </p>
 
                 {/* Rating */}
@@ -67,7 +73,7 @@ export default function TestimonialsSection() {
                 {/* Customer */}
                 <div className="mt-3 pt-3 border-t border-border-light">
                   <p className="text-sm font-body font-semibold text-charcoal">
-                    {t.name}
+                    {t.customerName || t.name}
                   </p>
                   <p className="text-xs font-body text-charcoal-muted mt-0.5">
                     {t.location}
@@ -78,7 +84,9 @@ export default function TestimonialsSection() {
           ))}
         </Swiper>
         ) : (
-          <div className="h-[250px] w-full" />
+          <div className="h-[250px] w-full flex items-center justify-center text-charcoal-muted/50">
+            {mounted ? "Loading reviews..." : ""}
+          </div>
         )}
       </div>
     </section>

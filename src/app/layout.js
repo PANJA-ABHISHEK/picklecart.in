@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Playfair_Display, Inter } from "next/font/google";
 import { SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 import { CartProvider } from "@/contexts/CartContext";
@@ -63,9 +64,13 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen flex flex-col">
         <CartProvider>
           <AOSInit />
-          <Navbar />
+          <Suspense fallback={<div className="h-20 bg-white border-b" />}>
+            <Navbar />
+          </Suspense>
           <main className="flex-1">{children}</main>
-          <Footer />
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
           <CartDrawer />
           <BackToTop />
           <WhatsAppButton />

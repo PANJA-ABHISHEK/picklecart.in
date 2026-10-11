@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { INDIAN_STATES } from "@/lib/constants";
 import Button from "@/components/ui/Button";
-import { ShoppingBag, CreditCard, Lock } from "lucide-react";
+import { ShoppingBag, CreditCard, Lock, Loader2 } from "lucide-react";
+import { createOrder } from "@/app/actions/orders";
 
 export default function CheckoutPage() {
-  const { items, subtotal, itemCount } = useCart();
+  const router = useRouter();
+  const { items, subtotal, itemCount, clearCart } = useCart();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -20,6 +23,18 @@ export default function CheckoutPage() {
     pincode: "",
   });
   const [errors, setErrors] = useState({});
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Load Razorpay Script dynamically
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
   const updateField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -43,17 +58,94 @@ export default function CheckoutPage() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    // Phase 1: Mock submission
-    alert(
-      "Phase 1: Checkout form validated successfully.\nRazorpay integration will be added in Phase 3."
-    );
+
+    setIsProcessing(true);
+
+    try {
+      // 1. Load Razorpay script
+      const res = await loadRazorpayScript();
+      if (!res) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. Call server action to create order
+      const orderRes = await createOrder(items, formData);
+      
+      if (!orderRes.success) {
+        alert(orderRes.error || "Failed to create order. Please try again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 3. Open Razorpay Checkout Modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+        amount: orderRes.amount,
+        currency: orderRes.currency,
+        name: "PickleCart",
+        description: "Test Transaction",
+        order_id: orderRes.razorpayOrderId,
+        handler: async function (response) {
+          try {
+            setIsProcessing(true);
+            const verifyRes = await fetch("/api/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: orderRes.orderId,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              clearCart();
+              router.push(`/checkout/success?order_id=${orderRes.orderId}`);
+            } else {
+              alert("Payment verification failed. Please contact support.");
+              setIsProcessing(false);
+            }
+          } catch (err) {
+            console.error("Verification error", err);
+            alert("Error verifying payment. Please contact support.");
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: formData.fullName,
+          email: formData.email,
+          contact: formData.mobile,
+        },
+        theme: {
+          color: "#b43d2c", // pickle-red
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      
+      paymentObject.on('payment.failed', function (response) {
+        alert("Payment Failed. Reason: " + response.error.description);
+      });
+      
+      paymentObject.open();
+
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred during checkout.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0) {
@@ -241,8 +333,14 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <Button type="submit" size="lg" className="w-full mt-5">
-                  Place Order
+                <Button type="submit" size="lg" className="w-full mt-5" disabled={isProcessing}>
+                  {isProcessing ? (
+                    <span className="flex items-center gap-2 justify-center">
+                      <Loader2 size={18} className="animate-spin" /> Processing...
+                    </span>
+                  ) : (
+                    "Place Order securely"
+                  )}
                 </Button>
 
                 <p className="text-xs font-body text-charcoal-muted text-center mt-3 flex items-center justify-center gap-1">

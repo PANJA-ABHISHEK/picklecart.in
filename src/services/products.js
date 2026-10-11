@@ -1,108 +1,88 @@
-/**
- * Product Service Abstraction
- *
- * Phase 1: Returns mock data from local modules.
- * Phase 2: Will switch to Firestore queries without UI changes.
- */
+"use server";
 
-import { products } from "@/lib/data/products";
+import { adminDb } from "@/lib/firebase/admin";
+import { connection } from "next/server";
 
-/**
- * Get all products.
- */
-export function getProducts() {
-  return products;
+export async function getProducts() {
+  await connection();
+  const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-/**
- * Get a single product by its slug.
- */
-export function getProductBySlug(slug) {
-  return products.find((p) => p.slug === slug) || null;
+export async function getProductBySlug(slug) {
+  await connection();
+  const doc = await adminDb.collection("products").doc(slug).get();
+  if (!doc.exists) return null;
+  return { id: doc.id, ...doc.data() };
 }
 
-/**
- * Get products belonging to a specific category.
- */
-export function getProductsByCategory(categoryId) {
-  return products.filter((p) => p.categoryIds.includes(categoryId));
+export async function getProductsByCategory(categoryId) {
+  await connection();
+  const snapshot = await adminDb.collection("products").where("categoryId", "==", categoryId).get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-/**
- * Get products belonging to a specific region.
- */
-export function getProductsByRegion(regionId) {
-  return products.filter((p) => p.regionIds.includes(regionId));
+export async function getProductsByRegion(regionId) {
+  await connection();
+  
+  // New schema: products with 'regions' array
+  const snapshotArray = await adminDb.collection("products").where("regions", "array-contains", regionId).get();
+  // Old schema: products with 'regionId' string
+  const snapshotString = await adminDb.collection("products").where("regionId", "==", regionId).get();
+  
+  const productsMap = new Map();
+  snapshotArray.docs.forEach(doc => productsMap.set(doc.id, { id: doc.id, ...doc.data() }));
+  snapshotString.docs.forEach(doc => productsMap.set(doc.id, { id: doc.id, ...doc.data() }));
+  
+  return Array.from(productsMap.values());
 }
 
-/**
- * Get products by both region AND category.
- */
-export function getProductsByRegionAndCategory(regionId, categoryId) {
-  return products.filter(
-    (p) => p.regionIds.includes(regionId) && p.categoryIds.includes(categoryId)
-  );
+export async function getProductsByRegionAndCategory(regionId, categoryId) {
+  const byRegion = await getProductsByRegion(regionId);
+  return byRegion.filter(p => p.categoryId === categoryId);
 }
 
-/**
- * Search products by name, tags, category, or region.
- */
-export function searchProducts(query) {
+export async function searchProducts(query) {
   if (!query || !query.trim()) return [];
-
   const q = query.toLowerCase().trim();
-
-  return products.filter((p) => {
-    const searchable = [
-      p.name,
-      p.shortDescription,
-      ...p.tags,
-      ...p.categoryIds,
-      ...p.regionIds,
-    ]
-      .join(" ")
-      .toLowerCase();
-
+  
+  // Since Firestore doesn't have native full-text search, we fetch all and filter for this scale
+  const allProducts = await getProducts();
+  return allProducts.filter(p => {
+    const searchable = [p.name, p.description, p.categoryId, p.regionId, ...(p.regions || [])].join(" ").toLowerCase();
     return searchable.includes(q);
   });
 }
 
-/**
- * Get featured products.
- */
-export function getFeaturedProducts() {
-  return products.filter((p) => p.featured);
+export async function getFeaturedProducts() {
+  await connection();
+  const snapshot = await adminDb.collection("products").where("featured", "==", true).get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-/**
- * Get best-selling products.
- */
-export function getBestSellingProducts() {
-  return products.filter((p) => p.bestSeller);
+export async function getBestSellingProducts() {
+  await connection();
+  const snapshot = await adminDb.collection("products").where("bestSeller", "==", true).get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-/**
- * Get newest products (mock: returns last N).
- */
-export function getNewestProducts(count = 8) {
-  return [...products].reverse().slice(0, count);
+export async function getNewestProducts(count = 8) {
+  await connection();
+  const snapshot = await adminDb.collection("products").orderBy("createdAt", "desc").limit(count).get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-/**
- * Sort products by a given criterion.
- */
-export function sortProducts(productList, sortBy = "featured") {
+export async function sortProducts(productListPromise, sortBy = "featured") {
+  const productList = await productListPromise;
   const sorted = [...productList];
 
   switch (sortBy) {
-    case "popular":
-      return sorted.sort((a, b) => b.reviewCount - a.reviewCount);
     case "price-low":
-      return sorted.sort((a, b) => a.price - b.price);
+      return sorted.sort((a, b) => Math.min(...a.pricing.map(p => p.price)) - Math.min(...b.pricing.map(p => p.price)));
     case "price-high":
-      return sorted.sort((a, b) => b.price - a.price);
+      return sorted.sort((a, b) => Math.min(...b.pricing.map(p => p.price)) - Math.min(...a.pricing.map(p => p.price)));
     case "newest":
-      return sorted.reverse();
+      return sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     case "featured":
     default:
       return sorted.sort((a, b) => {

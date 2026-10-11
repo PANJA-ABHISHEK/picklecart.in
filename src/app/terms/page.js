@@ -16,7 +16,7 @@ export default function TermsPage() {
           <h2 className="font-display text-xl font-bold text-charcoal">Delivery</h2>
           <p>We deliver across India. Standard delivery takes 4–7 business days. Delivery times may vary based on location and availability.</p>
           <h2 className="font-display text-xl font-bold text-charcoal">Contact</h2>
-          <p>For questions about our terms, please contact us at hello@picklecart.in.</p>
+          <p>For questions about our terms, please contact us at picklecartblr@gmail.com.</p>
         </div>
       </div>
     </div>

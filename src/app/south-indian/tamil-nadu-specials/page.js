@@ -1,5 +1,6 @@
 import { REGIONS, CATEGORIES } from "@/lib/constants";
 import RegionPageContent from "@/components/regional/RegionPageContent";
+import { getProductsByRegion } from "@/services/products";
 
 const REGION_ID = "tamil-nadu-specials";
 
@@ -9,8 +10,11 @@ export const metadata = {
     "Explore authentic Tamil Nadu food products — mango thokku, milagai podi, murukku, cold-pressed oils, and more.",
 };
 
-export default function TamilNaduSpecialsPage() {
+export const instant = false;
+
+export default async function TamilNaduSpecialsPage() {
   const region = REGIONS.find((r) => r.id === REGION_ID);
+  const allProducts = await getProductsByRegion(REGION_ID);
 
   return (
     <RegionPageContent
@@ -20,6 +24,7 @@ export default function TamilNaduSpecialsPage() {
       regions={[region]}
       categories={CATEGORIES}
       regionFilter={REGION_ID}
+      allProducts={allProducts}
     />
   );
 }

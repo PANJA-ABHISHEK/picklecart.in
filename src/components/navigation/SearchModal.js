@@ -45,9 +45,14 @@ export default function SearchModal({ isOpen, onClose }) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
-    debounce((q) => {
+    debounce(async (q) => {
       if (q.trim().length >= 2) {
-        setResults(searchProducts(q).slice(0, 8));
+        try {
+          const res = await searchProducts(q);
+          setResults(res.slice(0, 8));
+        } catch (e) {
+          setResults([]);
+        }
       } else {
         setResults([]);
       }

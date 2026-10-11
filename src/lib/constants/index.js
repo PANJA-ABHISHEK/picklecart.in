@@ -8,13 +8,13 @@ export const SITE_DESCRIPTION =
   "Authentic Indian pickles, podis, snacks & traditional food products. Handcrafted with traditional recipes from Andhra, Telangana, Karnataka & Tamil Nadu.";
 
 export const CONTACT = {
-  phone: "+91 98765 43210",
-  whatsapp: "+919876543210",
-  email: "hello@picklecart.in",
-  address: "Hyderabad, Telangana, India",
-  businessHours: "Mon – Sat: 9:00 AM – 7:00 PM IST",
-  instagram: "https://instagram.com/picklecart",
-  facebook: "https://facebook.com/picklecart",
+  phone: "+91 81238 08404",
+  whatsapp: "+918123808404",
+  email: "picklecartblr@gmail.com",
+  address: "Kodigehalli Main Road, K.R. Puram, Bangalore - 560049",
+  businessHours: "11:00 AM – 9:00 PM",
+  instagram: "https://www.instagram.com/picklecartblr?vrfl=bWpnem5iZ2tzazZq&utm_source=qr",
+  facebook: "https://www.facebook.com/people/picklecartblr/61594937865483/?mibextid=wwXIfr&rdid=UbFZHnMzFkFCSouJ&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F14tc8bBzU9C%2F%3Fmibextid%3DwwXIfr",
   googleMapsEmbed:
     "https://maps.google.com/maps?q=13.004570007324219,77.7180404663086&t=&z=17&ie=UTF8&iwloc=&output=embed",
 };
@@ -33,6 +33,7 @@ export const NAV_LINKS = [
   },
   { label: "North Indian Style", href: "/north-indian" },
   { label: "Corporate / Bulk Orders", href: "/corporate-bulk-orders" },
+  { label: "Track Order", href: "/track" },
   { label: "About Us", href: "/about" },
   { label: "Contact Us", href: "/contact" },
 ];
@@ -46,7 +47,7 @@ export const REGIONS = [
     description:
       "Andhra Pradesh is renowned for its bold, fiery cuisine. Our Andhra Delights collection brings you authentic avakaya, gongura pickles, and spice-packed podis made the traditional way.",
     image: "/picklecartimg4.png",
-    cardImage: "/AndhraPradesh.png",
+    cardImage: "/AndhraPradeshregionhome.png",
     parentRoute: "/south-indian",
   },
   {
@@ -57,7 +58,7 @@ export const REGIONS = [
     description:
       "Telangana's cuisine is rich with rustic flavours and traditional recipes passed down through generations. Discover authentic pickles and podis from the Deccan heartland.",
     image: "/picklecartimg2.png",
-    cardImage: "/Telangana.png",
+    cardImage: "/Telanganaregionhome.png",
     parentRoute: "/south-indian",
   },
   {
@@ -68,7 +69,7 @@ export const REGIONS = [
     description:
       "Karnataka offers a diverse palette of flavours, from tangy mango thokku to aromatic curry leaf podis. Explore our carefully curated selection of Karnataka's finest.",
     image: "/picklecartimg1.png",
-    cardImage: "/Karnataka.jpeg",
+    cardImage: "/karnatakaregionhome.png",
     parentRoute: "/south-indian",
   },
   {
@@ -79,7 +80,7 @@ export const REGIONS = [
     description:
       "Tamil Nadu's culinary traditions are steeped in history and flavour. From classic vadu mangai to aromatic milagai podi, experience the taste of authentic Tamil Nadu.",
     image: "/picklecartimg5.png",
-    cardImage: "/Tamilnadu.jpeg",
+    cardImage: "/Tamilnaduregionhome.png",
     parentRoute: "/south-indian",
   },
   {

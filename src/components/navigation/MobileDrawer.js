@@ -12,6 +12,11 @@ export default function MobileDrawer({ isOpen, onClose }) {
   const pathname = usePathname();
   const { itemCount, toggleDrawer } = useCart();
   const [expandedMenu, setExpandedMenu] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Body scroll lock
   useEffect(() => {
@@ -162,7 +167,7 @@ export default function MobileDrawer({ isOpen, onClose }) {
             >
               <ShoppingBag size={20} />
               Cart
-              {itemCount > 0 && (
+              {mounted && itemCount > 0 && (
                 <span className="ml-auto bg-pickle-red text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {itemCount}
                 </span>

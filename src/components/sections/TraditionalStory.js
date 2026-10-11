@@ -27,7 +27,7 @@ const steps = [
     title: "Seal & Deliver",
     description:
       "Prepared with care and sealed to preserve freshness, every jar reaches your table with the same homemade warmth and quality we stand behind.",
-    image: "/images/story/final.jpg",
+    image: "/Traditional Pickle Jar Display.png",
   },
 ];
 
@@ -70,7 +70,7 @@ export default function TraditionalStory() {
                 >
                   <div
                     className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${bgUrl})` }}
+                    style={{ backgroundImage: `url('${bgUrl}')` }}
                     role="img"
                     aria-label={item.title}
                   />

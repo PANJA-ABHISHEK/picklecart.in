@@ -51,7 +51,7 @@
 }
 
 /* ── Tailwind v4 Theme Tokens ── */
-@theme inline {
+@theme {
   --color-heritage-green: var(--heritage-green);
   --color-heritage-green-light: var(--heritage-green-light);
   --color-heritage-green-dark: var(--heritage-green-dark);
@@ -255,4 +255,21 @@ body.menu-open {
   overflow: hidden;
   position: fixed;
   width: 100%;
+}
+
+/* ── Custom Animations ── */
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 120s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

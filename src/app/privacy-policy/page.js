@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
           <h2 className="font-display text-xl font-bold text-charcoal">How We Use Your Information</h2>
           <p>Your information is used to process orders, communicate updates, improve our services, and provide customer support. We do not sell your personal data to third parties.</p>
           <h2 className="font-display text-xl font-bold text-charcoal">Contact</h2>
-          <p>If you have questions about our privacy practices, please contact us at hello@picklecart.in.</p>
+          <p>If you have questions about our privacy practices, please contact us at picklecartblr@gmail.com.</p>
         </div>
       </div>
     </div>

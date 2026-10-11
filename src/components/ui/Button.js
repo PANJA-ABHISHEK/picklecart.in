@@ -2,9 +2,9 @@ import Link from "next/link";
 
 const variants = {
   primary:
-    "bg-pickle-red text-white hover:bg-pickle-red-dark focus-visible:ring-pickle-red",
+    "bg-pickle-red !text-white hover:bg-pickle-red-dark focus-visible:ring-pickle-red",
   secondary:
-    "bg-heritage-green text-white hover:bg-heritage-green-dark focus-visible:ring-heritage-green",
+    "bg-heritage-green !text-white hover:bg-heritage-green-dark focus-visible:ring-heritage-green",
   outline:
     "border-2 border-charcoal text-charcoal hover:bg-charcoal hover:!text-white focus-visible:ring-charcoal",
   "outline-light":
