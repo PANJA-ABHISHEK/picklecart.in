@@ -2,17 +2,40 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Phone, Mail, MapPin, Clock, MessageCircle, ChevronRight } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, MessageCircle, ChevronRight, CheckCircle } from "lucide-react";
 import { CONTACT } from "@/lib/constants";
 import Button from "@/components/ui/Button";
 import { submitContactQuery } from "@/app/actions/enquiries";
 import { fetchLocations } from "@/app/actions/locations";
+
+const WHATSAPP_PHONE = "918123808404";
+
+function buildContactWhatsAppUrl(data) {
+  const lines = [
+    "*NEW CONTACT US ENQUIRY*",
+    "*PickleCart Bangalore*",
+    "----------------------------------------",
+    `*Name:* ${data.name || "N/A"}`,
+    `*Email Address:* ${data.email || "N/A"}`,
+    `*Mobile Number:* ${data.mobile && data.mobile.trim() ? data.mobile.trim() : "Not provided"}`,
+    `*Subject:* ${data.subject && data.subject.trim() ? data.subject.trim() : "General Enquiry"}`,
+    "----------------------------------------",
+    "*Message:*",
+    data.message && data.message.trim() ? data.message.trim() : "N/A",
+    "----------------------------------------",
+    "Sent via PickleCart Website (picklecart.in)",
+  ];
+
+  return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 
 export default function ContactContent() {
   const [formData, setFormData] = useState({
     name: "", email: "", mobile: "", subject: "", message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState("");
   const [errors, setErrors] = useState({});
   const [locations, setLocations] = useState([]);
   const [activeLocationIndex, setActiveLocationIndex] = useState(0);
@@ -48,11 +71,24 @@ export default function ContactContent() {
     const v = validate();
     if (Object.keys(v).length > 0) { setErrors(v); return; }
     
-    const res = await submitContactQuery(formData);
-    if (res.success) {
-      setSubmitted(true);
-    } else {
-      setErrors({ form: res.error });
+    setSubmitting(true);
+    const waUrl = buildContactWhatsAppUrl(formData);
+    setWhatsappUrl(waUrl);
+
+    try {
+      await submitContactQuery(formData);
+    } catch (err) {
+      console.error("Backend error saving contact query:", err);
+    }
+
+    setSubmitted(true);
+    setSubmitting(false);
+
+    // Open WhatsApp in a new tab with all details pre-filled
+    try {
+      window.open(waUrl, "_blank");
+    } catch (e) {
+      console.error("Popup error:", e);
     }
   };
 
@@ -218,23 +254,71 @@ export default function ContactContent() {
               <h2 className="font-display text-2xl md:text-3xl font-bold text-charcoal mb-8">Send Us a Message</h2>
 
               {submitted ? (
-                <div className="text-center py-10">
-                  <div className="w-14 h-14 bg-heritage-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mail size={24} className="text-heritage-green" />
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-heritage-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={38} className="text-heritage-green" />
                   </div>
-                  <h3 className="font-display text-lg font-bold text-charcoal mb-2">Message Received!</h3>
-                  <p className="font-body text-sm text-charcoal-muted">
-                    Thank you for reaching out. We&apos;ll get back to you as soon as possible.
+                  <h3 className="font-display text-2xl font-bold text-charcoal mb-2">Message Sent Successfully!</h3>
+                  <p className="font-body text-sm text-charcoal-muted max-w-md mx-auto leading-relaxed mb-6">
+                    Thank you for reaching out! We have received your query. A direct WhatsApp message to{" "}
+                    <span className="font-bold text-charcoal">+91 81238 08404</span> with your details has also been prepared.
                   </p>
+
+                  {/* Summary Card */}
+                  <div className="bg-cream/60 border border-border-light rounded-2xl p-4 max-w-sm mx-auto mb-6 text-left space-y-2 text-xs font-body shadow-2xs">
+                    <div className="flex justify-between items-center text-charcoal pb-1 border-b border-border-light/50">
+                      <span className="text-charcoal-muted font-medium">From:</span>
+                      <span className="font-bold">{formData.name}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-charcoal">
+                      <span className="text-charcoal-muted font-medium">Email:</span>
+                      <span className="font-medium">{formData.email}</span>
+                    </div>
+                    {formData.mobile && (
+                      <div className="flex justify-between items-center text-charcoal">
+                        <span className="text-charcoal-muted font-medium">Mobile:</span>
+                        <span className="font-medium">{formData.mobile}</span>
+                      </div>
+                    )}
+                    {formData.subject && (
+                      <div className="flex justify-between items-center text-charcoal">
+                        <span className="text-charcoal-muted font-medium">Subject:</span>
+                        <span className="font-medium">{formData.subject}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold rounded-xl text-sm shadow-md transition-all hover:scale-105 active:scale-95"
+                      style={{ color: "#FFFFFF" }}
+                    >
+                      <MessageCircle size={18} className="fill-white text-white" />
+                      <span>Chat on WhatsApp (+91 81238 08404)</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubmitted(false);
+                        setFormData({ name: "", email: "", mobile: "", subject: "", message: "" });
+                      }}
+                      className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-cream border border-border-light text-charcoal font-semibold rounded-xl text-xs transition-colors shadow-2xs cursor-pointer"
+                    >
+                      Send Another Message
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {errors.form && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-sm mb-4">{errors.form}</div>}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Your Name" error={errors.name}>
+                    <Field label="Your Name *" error={errors.name}>
                       <input type="text" value={formData.name} onChange={(e) => updateField("name", e.target.value)} className="form-input" placeholder="Full name" />
                     </Field>
-                    <Field label="Email" error={errors.email}>
+                    <Field label="Email *" error={errors.email}>
                       <input type="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} className="form-input" placeholder="you@example.com" />
                     </Field>
                   </div>
@@ -246,10 +330,18 @@ export default function ContactContent() {
                       <input type="text" value={formData.subject} onChange={(e) => updateField("subject", e.target.value)} className="form-input" placeholder="How can we help?" />
                     </Field>
                   </div>
-                  <Field label="Message" error={errors.message}>
+                  <Field label="Message *" error={errors.message}>
                     <textarea value={formData.message} onChange={(e) => updateField("message", e.target.value)} className="form-input min-h-[120px] resize-none" placeholder="Tell us more..." />
                   </Field>
-                  <Button type="submit" size="lg">Send Message</Button>
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    disabled={submitting}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle size={18} />
+                    <span>{submitting ? "Sending..." : "Send Message"}</span>
+                  </Button>
                 </form>
               )}
             </div>

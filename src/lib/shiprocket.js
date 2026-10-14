@@ -35,6 +35,14 @@ export async function pushOrderToShiprocket(orderId, orderData) {
     const customer = orderData.customer || {};
     const items = Array.isArray(orderData.items) ? orderData.items : [];
 
+    const shippingFee = Number(
+      orderData.shippingFee ?? 
+      orderData.shipping ?? 
+      Math.max(0, (Number(orderData.total) || 0) - (Number(orderData.subtotal) || 0) + (Number(orderData.discount) || 0))
+    );
+    const discount = Number(orderData.discount ?? 0);
+    const subtotal = Number(orderData.subtotal ?? (Number(orderData.total || 0) - shippingFee + discount) ?? 0);
+
     const shiprocketPayload = {
       order_id: String(orderId), // Your internal order ID
       order_date: safeDate, // YYYY-MM-DD
@@ -61,7 +69,9 @@ export async function pushOrderToShiprocket(orderId, orderData) {
         selling_price: Number(orderData.total) || 100
       }],
       payment_method: "Prepaid", // Razorpay means it's prepaid
-      sub_total: Number(orderData.subtotal ?? orderData.total ?? 0),
+      sub_total: subtotal,
+      shipping_charges: shippingFee,
+      total_discount: discount,
       length: 10, // Default dimensions in cm (adjust as needed)
       breadth: 10,
       height: 10,

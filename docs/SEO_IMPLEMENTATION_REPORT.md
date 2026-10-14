@@ -3,7 +3,7 @@
 **Document Date:** October 12, 2026  
 **Website:** [https://picklecart.in](https://picklecart.in)  
 **Brand Identity:** PickleCart — Fill Your Cart with Tradition  
-**Business Location:** Kodigehalli Main Road, K.R. Puram, Bangalore - 560049  
+**Business Location:** Kodigehalli Main Road, K.R. Puram, Bangalore - 560036  
 **Implementation Methodology:** Technical SEO Engineering & React/Next.js SEO Architecture  
 
 ---
@@ -144,7 +144,7 @@ PickleCart leverages **Next.js 16 App Router** with server-first rendering:
 
 1. **OnlineStore / Organization Schema:**
    - Injected globally in `src/app/layout.js`.
-   - Verified official address: Kodigehalli Main Road, K.R. Puram, Bangalore - 560049.
+   - Verified official address: Kodigehalli Main Road, K.R. Puram, Bangalore - 560036.
    - Includes official phone, email, geo coordinates (13.00457, 77.71804), hours, and social media handles.
 2. **WebSite Schema:**
    - Injected globally in `src/app/layout.js`.
@@ -206,7 +206,7 @@ The following actions require direct access to external accounts and cannot be a
 3. **Google Merchant Center (Optional):**
    - Connect `https://picklecart.in` to Google Merchant Center for free product listings on Google Shopping. The JSON-LD Product schema is already formatted to comply with Merchant Center crawlers.
 4. **Google Business Profile (Local SEO):**
-   - Claim and verify your Google Business Profile for PickleCart at **Kodigehalli Main Road, K.R. Puram, Bangalore - 560049**. This will enhance Google Maps and Local Pack visibility for "Pickles in Bangalore" searches.
+   - Claim and verify your Google Business Profile for PickleCart at **Kodigehalli Main Road, K.R. Puram, Bangalore - 560036**. This will enhance Google Maps and Local Pack visibility for "Pickles in Bangalore" searches.
 
 ---
 

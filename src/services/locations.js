@@ -140,7 +140,7 @@ export async function seedInitialLocation() {
 
     const initialLocation = {
       name: "PickleCart Bangalore",
-      address: "3rd Main, opposite ECO Hypermarket, near Alfa Gardens, Kodigehalli Main Road, K. R. Puram, Bangalore, India 560049.",
+      address: "3rd Main, opposite ECO Hypermarket, near Alfa Gardens, Kodigehalli Main Road, K. R. Puram, Bangalore, India 560036.",
       phone: "+91 81238 08404",
       whatsapp: "+91 81238 08404",
       email: "picklecartblr@gmail.com",

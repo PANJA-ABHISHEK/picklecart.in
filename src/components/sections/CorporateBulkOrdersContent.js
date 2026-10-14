@@ -3,8 +3,33 @@
 import { useState } from "react";
 import { REQUIREMENT_TYPES } from "@/lib/constants";
 import Button from "@/components/ui/Button";
-import { Building2, Gift, CheckCircle } from "lucide-react";
+import { Building2, Gift, CheckCircle, MessageCircle } from "lucide-react";
 import { submitBulkEnquiry } from "@/app/actions/enquiries";
+
+const WHATSAPP_PHONE = "918123808404";
+
+function buildCorporateWhatsAppUrl(data) {
+  const lines = [
+    "*NEW CORPORATE / BULK ORDER ENQUIRY*",
+    "*PickleCart Bangalore*",
+    "----------------------------------------",
+    `*Full Name:* ${data.fullName || "N/A"}`,
+    `*Company / Org:* ${data.company && data.company.trim() ? data.company.trim() : "N/A"}`,
+    `*Mobile Number:* ${data.mobile || "N/A"}`,
+    `*Email Address:* ${data.email || "N/A"}`,
+    `*Location:* ${data.location && data.location.trim() ? data.location.trim() : "Not specified"}`,
+    "----------------------------------------",
+    `*Requirement Type:* ${data.requirementType || "General Bulk Order"}`,
+    `*Approx Quantity:* ${data.quantity && data.quantity.trim() ? data.quantity.trim() : "Not specified"}`,
+    "----------------------------------------",
+    "*Requirement Details:*",
+    data.message && data.message.trim() ? data.message.trim() : "N/A",
+    "----------------------------------------",
+    "Sent via PickleCart Website (picklecart.in)",
+  ];
+
+  return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 
 export default function CorporateBulkOrdersContent() {
   const [formData, setFormData] = useState({
@@ -12,6 +37,8 @@ export default function CorporateBulkOrdersContent() {
     requirementType: "", quantity: "", message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState("");
   const [errors, setErrors] = useState({});
 
   const updateField = (field, value) => {
@@ -22,7 +49,9 @@ export default function CorporateBulkOrdersContent() {
   const validate = () => {
     const e = {};
     if (!formData.fullName.trim()) e.fullName = "Name is required";
-    if (!formData.mobile.trim() || !/^[6-9]\d{9}$/.test(formData.mobile)) e.mobile = "Valid mobile number required";
+    if (!formData.mobile.trim() || !/^[6-9]\d{9}$/.test(formData.mobile.replace(/\s+/g, ""))) {
+      e.mobile = "Valid 10-digit mobile number required";
+    }
     if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) e.email = "Valid email required";
     if (!formData.requirementType) e.requirementType = "Please select a requirement type";
     if (!formData.message.trim()) e.message = "Please describe your requirement";
@@ -34,11 +63,24 @@ export default function CorporateBulkOrdersContent() {
     const v = validate();
     if (Object.keys(v).length > 0) { setErrors(v); return; }
     
-    const res = await submitBulkEnquiry(formData);
-    if (res.success) {
-      setSubmitted(true);
-    } else {
-      setErrors({ form: res.error });
+    setSubmitting(true);
+    const waUrl = buildCorporateWhatsAppUrl(formData);
+    setWhatsappUrl(waUrl);
+
+    try {
+      await submitBulkEnquiry(formData);
+    } catch (err) {
+      console.error("Backend error saving bulk enquiry:", err);
+    }
+
+    setSubmitted(true);
+    setSubmitting(false);
+
+    // Open WhatsApp in a new tab with all details pre-filled
+    try {
+      window.open(waUrl, "_blank");
+    } catch (e) {
+      console.error("Popup error:", e);
     }
   };
 
@@ -78,7 +120,7 @@ export default function CorporateBulkOrdersContent() {
               { title: "Wholesale", desc: "For retail & restaurants" },
               { title: "Custom Packs", desc: "Personalised branding" },
               { title: "Bulk Pricing", desc: "Exclusive discounts" }
-            ].map((item, i) => (
+            ].map((item) => (
               <div key={item.title} className="p-4 md:p-5 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl shadow-charcoal/5 border border-white/50 text-center hover:-translate-y-1.5 transition-transform duration-300">
                 <div className="w-10 h-10 mx-auto rounded-full bg-cream flex items-center justify-center mb-2.5">
                   <CheckCircle size={18} className="text-heritage-green" />
@@ -99,20 +141,84 @@ export default function CorporateBulkOrdersContent() {
             </div>
 
             {submitted ? (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 mx-auto bg-cream rounded-full flex items-center justify-center mb-6">
-                  <CheckCircle size={40} className="text-heritage-green" />
+              <div className="text-center py-8">
+                <div className="w-20 h-20 mx-auto bg-heritage-green/10 rounded-full flex items-center justify-center mb-5">
+                  <CheckCircle size={44} className="text-heritage-green" />
                 </div>
-                <h3 className="font-display text-2xl font-bold text-charcoal mb-3">Enquiry Submitted!</h3>
-                <p className="font-body text-base text-charcoal-muted max-w-sm mx-auto leading-relaxed">
-                  Thank you for your interest. Our team will review your requirement and get back to you within 24 hours.
+                <h3 className="font-display text-2xl md:text-3xl font-bold text-charcoal mb-2">
+                  Enquiry Submitted Successfully!
+                </h3>
+                <p className="font-body text-base text-charcoal-muted max-w-lg mx-auto leading-relaxed mb-6">
+                  Thank you for reaching out! We have received your requirement. A direct WhatsApp message to{" "}
+                  <span className="font-bold text-charcoal">+91 81238 08404</span> with all your enquiry details has also been prepared.
                 </p>
+
+                {/* Summary Card */}
+                <div className="bg-cream/60 border border-border-light rounded-2xl p-5 max-w-md mx-auto mb-8 text-left space-y-2 text-sm font-body shadow-2xs">
+                  <div className="flex justify-between items-center text-charcoal pb-1 border-b border-border-light/50">
+                    <span className="text-charcoal-muted text-xs font-medium">Customer:</span>
+                    <span className="font-bold">{formData.fullName}</span>
+                  </div>
+                  {formData.company && (
+                    <div className="flex justify-between items-center text-charcoal">
+                      <span className="text-charcoal-muted text-xs font-medium">Company:</span>
+                      <span className="font-medium">{formData.company}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-charcoal">
+                    <span className="text-charcoal-muted text-xs font-medium">Mobile:</span>
+                    <span className="font-medium">{formData.mobile}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-charcoal">
+                    <span className="text-charcoal-muted text-xs font-medium">Requirement Type:</span>
+                    <span className="font-medium">{formData.requirementType}</span>
+                  </div>
+                  {formData.quantity && (
+                    <div className="flex justify-between items-center text-charcoal">
+                      <span className="text-charcoal-muted text-xs font-medium">Quantity:</span>
+                      <span className="font-medium">{formData.quantity}</span>
+                    </div>
+                  )}
+                  {formData.location && (
+                    <div className="flex justify-between items-center text-charcoal">
+                      <span className="text-charcoal-muted text-xs font-medium">Location:</span>
+                      <span className="font-medium">{formData.location}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold rounded-xl text-sm shadow-md transition-all hover:scale-105 active:scale-95"
+                    style={{ color: "#FFFFFF" }}
+                  >
+                    <MessageCircle size={20} className="fill-white text-white" />
+                    <span>Chat on WhatsApp (+91 81238 08404)</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubmitted(false);
+                      setFormData({
+                        fullName: "", company: "", mobile: "", email: "", location: "",
+                        requirementType: "", quantity: "", message: "",
+                      });
+                    }}
+                    className="w-full sm:w-auto px-6 py-3.5 bg-white hover:bg-cream border border-border-light text-charcoal font-semibold rounded-xl text-sm transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Submit Another Enquiry
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {errors.form && <div className="p-4 bg-red-50 text-red-600 text-sm rounded-lg mb-4 font-medium">{errors.form}</div>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Full Name" error={errors.fullName}>
+                  <Field label="Full Name *" error={errors.fullName}>
                     <input type="text" value={formData.fullName} onChange={(e) => updateField("fullName", e.target.value)} className="form-input" placeholder="Your name" />
                   </Field>
                   <Field label="Company / Organization">
@@ -120,10 +226,10 @@ export default function CorporateBulkOrdersContent() {
                   </Field>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Mobile Number" error={errors.mobile}>
+                  <Field label="Mobile Number *" error={errors.mobile}>
                     <input type="tel" value={formData.mobile} onChange={(e) => updateField("mobile", e.target.value)} className="form-input" placeholder="10-digit number" />
                   </Field>
-                  <Field label="Email" error={errors.email}>
+                  <Field label="Email *" error={errors.email}>
                     <input type="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} className="form-input" placeholder="you@company.com" />
                   </Field>
                 </div>
@@ -131,7 +237,7 @@ export default function CorporateBulkOrdersContent() {
                   <Field label="Location">
                     <input type="text" value={formData.location} onChange={(e) => updateField("location", e.target.value)} className="form-input" placeholder="City / State" />
                   </Field>
-                  <Field label="Requirement Type" error={errors.requirementType}>
+                  <Field label="Requirement Type *" error={errors.requirementType}>
                     <select value={formData.requirementType} onChange={(e) => updateField("requirementType", e.target.value)} className="form-input">
                       <option value="">Select type</option>
                       {REQUIREMENT_TYPES.map((t) => (<option key={t} value={t}>{t}</option>))}
@@ -141,11 +247,19 @@ export default function CorporateBulkOrdersContent() {
                 <Field label="Approximate Quantity">
                   <input type="text" value={formData.quantity} onChange={(e) => updateField("quantity", e.target.value)} className="form-input" placeholder="e.g. 100 jars, 50 hampers" />
                 </Field>
-                <Field label="Your Requirement" error={errors.message}>
+                <Field label="Your Requirement *" error={errors.message}>
                   <textarea value={formData.message} onChange={(e) => updateField("message", e.target.value)} className="form-input min-h-[120px] resize-none" placeholder="Describe your requirement, products, timeline, etc." />
                 </Field>
                 <div className="mt-8 text-center">
-                  <Button type="submit" size="xl" className="w-full md:w-auto min-w-[250px] shadow-lg shadow-charcoal/10 hover:shadow-xl hover:-translate-y-0.5 transition-all">Submit Enquiry</Button>
+                  <Button 
+                    type="submit" 
+                    size="xl" 
+                    disabled={submitting}
+                    className="w-full md:w-auto min-w-[260px] shadow-lg shadow-charcoal/10 hover:shadow-xl hover:-translate-y-0.5 transition-all inline-flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle size={18} />
+                    <span>{submitting ? "Submitting..." : "Submit Enquiry"}</span>
+                  </Button>
                 </div>
               </form>
             )}

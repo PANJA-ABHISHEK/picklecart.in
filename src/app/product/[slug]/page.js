@@ -57,7 +57,7 @@ export default async function ProductDetailPage({ params }) {
 
   // Handle both array (Phase 1 mock) and string (Phase 2 Firestore) structures
   const productCategoryIds = product.categoryIds || (product.categoryId ? [product.categoryId] : []);
-  const productRegionIds = product.regionIds || (product.regionId ? [product.regionId] : []);
+  const productRegionIds = product.regions || product.regionIds || (product.regionId ? [product.regionId] : []);
 
   // Get related products
   const relatedFull = productCategoryIds.length > 0 

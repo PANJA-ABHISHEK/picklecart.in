@@ -134,6 +134,7 @@ export async function createOrder(cartItems, customerInfo, promoCode = null) {
       subtotal: subtotal,
       discount: discount,
       shipping: shippingFee,
+      shippingFee: shippingFee,
       promoCode: appliedPromoDetails ? appliedPromoDetails.code : null,
       total: total,
       status: "pending_payment",
@@ -165,6 +166,14 @@ export async function getAdminOrders() {
       success: true,
       orders: snapshot.docs.map(doc => {
         let data = doc.data();
+        const shippingVal = Number(
+          data.shippingFee ?? 
+          data.shipping ?? 
+          Math.max(0, (Number(data.total) || 0) - (Number(data.subtotal) || 0) + (Number(data.discount) || 0))
+        );
+        data.shippingFee = shippingVal;
+        data.shipping = shippingVal;
+
         // Auto-fix for orders that failed to get a shiprocket ID
         if (data.status === "processing" && (!data.shiprocketOrderId || data.shiprocketOrderId === "unknown")) {
           doc.ref.update({ status: "paid", shiprocketOrderId: null, shiprocketShipmentId: null });
@@ -172,6 +181,12 @@ export async function getAdminOrders() {
           data.shiprocketOrderId = null;
           data.shiprocketShipmentId = null;
         }
+
+        // Backfill shippingFee in Firestore if missing
+        if (data.shippingFee === undefined || data.shipping === undefined) {
+          doc.ref.update({ shippingFee: shippingVal, shipping: shippingVal }).catch(() => {});
+        }
+
         return { id: doc.id, ...data };
       })
     };

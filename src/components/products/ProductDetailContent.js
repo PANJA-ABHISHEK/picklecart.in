@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Star, ShoppingCart, Minus, Plus, ChevronRight, Truck, Shield, RotateCcw } from "lucide-react";
+import { Star, ShoppingCart, Minus, Plus, ChevronRight, Truck, Shield, PackageCheck } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, sortVariantsByWeight } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Image from "next/image";
@@ -20,23 +20,47 @@ export default function ProductDetailContent({
 }) {
   const router = useRouter();
   const { addItem, openDrawer } = useCart();
-  const variants = product.pricing || product.variants || [];
-  const [selectedVariant, setSelectedVariant] = useState(variants[0] || { price: 0, label: "Default", id: "default" });
+  const rawVariants = useMemo(() => product.pricing || product.variants || [], [product.pricing, product.variants]);
+  const variants = useMemo(() => sortVariantsByWeight(rawVariants), [rawVariants]);
+  const [selectedVariant, setSelectedVariant] = useState(
+    () => variants[0] || { price: product.price || 0, label: "Default", id: "default" }
+  );
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
 
+  // Sync to smallest starting weight whenever the product changes
+  useEffect(() => {
+    if (variants.length > 0) {
+      setSelectedVariant(variants[0]);
+    } else {
+      setSelectedVariant({ price: product.price || 0, label: "Default", id: "default" });
+    }
+  }, [product.id, variants]);
+
+  const isVariantActive = (v) => {
+    if (!selectedVariant) return false;
+    if (v.id && selectedVariant.id) return v.id === selectedVariant.id;
+    if (v.weight && selectedVariant.weight) return v.weight === selectedVariant.weight;
+    if (v.label && selectedVariant.label) return v.label === selectedVariant.label;
+    return v === selectedVariant;
+  };
+
   const isOutOfStock = product.inStock === false && !selectedVariant?.inStock;
+  const currentPrice = selectedVariant?.price ?? product.price ?? 0;
 
   const handleAddToCart = () => {
+    const variantId = selectedVariant?.id || selectedVariant?.weight || selectedVariant?.label || "default";
+    const variantLabel = selectedVariant?.weight || selectedVariant?.label || "Default";
+
     for (let i = 0; i < quantity; i++) {
       addItem({
         productId: product.id,
-        variantId: selectedVariant.id,
+        variantId,
         name: product.name,
-        variantLabel: selectedVariant.weight || selectedVariant.label || "Default",
-        price: selectedVariant.price,
+        variantLabel,
+        price: currentPrice,
         image: product.image || product.images?.[0] || null,
       });
     }
@@ -48,13 +72,16 @@ export default function ProductDetailContent({
   };
 
   const handleBuyNow = () => {
+    const variantId = selectedVariant?.id || selectedVariant?.weight || selectedVariant?.label || "default";
+    const variantLabel = selectedVariant?.weight || selectedVariant?.label || "Default";
+
     for (let i = 0; i < quantity; i++) {
       addItem({
         productId: product.id,
-        variantId: selectedVariant.id,
+        variantId,
         name: product.name,
-        variantLabel: selectedVariant.weight || selectedVariant.label || "Default",
-        price: selectedVariant.price,
+        variantLabel,
+        price: currentPrice,
         image: product.image || product.images?.[0] || null,
       });
     }
@@ -64,10 +91,10 @@ export default function ProductDetailContent({
   const productImg = product.image || product.images?.[selectedImageIndex] || null;
   const mainImage = resolveImage(productImg, { width: 800, height: 800, text: product.name });
 
-  const compareAtPrice = selectedVariant.originalPrice || product.compareAtPrice;
-  const hasDiscount = compareAtPrice && compareAtPrice > selectedVariant.price;
+  const compareAtPrice = selectedVariant?.originalPrice || product.compareAtPrice;
+  const hasDiscount = compareAtPrice && compareAtPrice > currentPrice;
   const discountPercentage = hasDiscount 
-    ? Math.round(((compareAtPrice - selectedVariant.price) / compareAtPrice) * 100)
+    ? Math.round(((compareAtPrice - currentPrice) / compareAtPrice) * 100)
     : (product.discountPercentage || 0);
 
   return (
@@ -165,7 +192,7 @@ export default function ProductDetailContent({
             {/* Price */}
             <div className="flex items-baseline gap-3 mt-4">
               <span className="text-3xl font-display font-bold text-charcoal">
-                {formatPrice(selectedVariant.price)}
+                {formatPrice(currentPrice)}
               </span>
               {compareAtPrice && (
                 <span className="text-lg font-body text-charcoal-muted line-through">
@@ -185,19 +212,24 @@ export default function ProductDetailContent({
                 Size / Weight
               </p>
               <div className="flex flex-wrap gap-2">
-                {variants.map((v, idx) => (
-                  <button
-                    key={v.id || idx}
-                    onClick={() => setSelectedVariant(v)}
-                    className={`px-4 py-2 text-sm font-body rounded-sm border-2 transition-all duration-200 ${
-                      selectedVariant.id === v.id
-                        ? "border-heritage-green bg-heritage-green/5 text-heritage-green font-semibold"
-                        : "border-border text-charcoal-light hover:border-charcoal-muted"
-                    }`}
-                  >
-                    {v.weight || v.label}
-                  </button>
-                ))}
+                {variants.map((v, idx) => {
+                  const active = isVariantActive(v);
+                  return (
+                    <button
+                      key={v.id || v.weight || idx}
+                      type="button"
+                      onClick={() => setSelectedVariant(v)}
+                      className={`px-4 py-2 text-sm font-body rounded-md border-2 transition-all duration-200 cursor-pointer ${
+                        active
+                          ? "border-heritage-green bg-heritage-green text-warm-white font-semibold shadow-xs"
+                          : "border-border bg-white text-charcoal-light hover:border-charcoal-muted hover:text-charcoal"
+                      }`}
+                      aria-pressed={active}
+                    >
+                      {v.weight || v.label}
+                    </button>
+                  );
+                })}
               </div>
               {selectedVariant.stock <= 5 && selectedVariant.stock > 0 && (
                 <p className="text-xs font-body text-pickle-red mt-1.5">
@@ -268,9 +300,9 @@ export default function ProductDetailContent({
               </div>
               <div className="text-center">
                 <div className="w-10 h-10 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-2">
-                  <RotateCcw size={18} className="text-heritage-green" />
+                  <PackageCheck size={18} className="text-heritage-green" />
                 </div>
-                <p className="text-xs font-body text-charcoal-muted font-medium">Easy Returns</p>
+                <p className="text-xs font-body text-charcoal-muted font-medium">Freshness Sealed</p>
               </div>
             </div>
 

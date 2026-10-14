@@ -82,3 +82,35 @@ export function calcDiscount(price, compareAtPrice) {
   if (!compareAtPrice || compareAtPrice <= price) return 0;
   return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
 }
+
+/**
+ * Parse weight/volume string into a normalized numeric value (in grams / ml) for comparison.
+ */
+export function parseWeightValue(str) {
+  if (!str) return 0;
+  const s = String(str).toLowerCase().trim();
+  const match = s.match(/([\d.]+)\s*(kg|k\.g|g|gm|gms|gram|grams|l|litre|litres|ml)?/i);
+  if (!match) return 0;
+  const num = parseFloat(match[1]) || 0;
+  const unit = (match[2] || "").toLowerCase();
+  if (unit === "kg" || unit === "k.g" || unit === "l" || unit === "litre" || unit === "litres") {
+    return num * 1000;
+  }
+  return num;
+}
+
+/**
+ * Sorts variants by weight ascending (smallest weight first).
+ * If weights cannot be parsed or are identical, falls back to price ascending.
+ */
+export function sortVariantsByWeight(variants = []) {
+  if (!Array.isArray(variants) || variants.length === 0) return [];
+  return [...variants].sort((a, b) => {
+    const wA = parseWeightValue(a.weight || a.label);
+    const wB = parseWeightValue(b.weight || b.label);
+    if (wA > 0 && wB > 0 && wA !== wB) {
+      return wA - wB;
+    }
+    return (a.price || 0) - (b.price || 0);
+  });
+}

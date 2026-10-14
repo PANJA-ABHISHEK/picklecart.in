@@ -11,7 +11,7 @@ export const CONTACT = {
   phone: "+91 81238 08404",
   whatsapp: "+918123808404",
   email: "picklecartblr@gmail.com",
-  address: "Kodigehalli Main Road, K.R. Puram, Bangalore - 560049",
+  address: "Kodigehalli Main Road, K.R. Puram, Bangalore - 560036",
   businessHours: "11:00 AM – 9:00 PM",
   instagram: "https://www.instagram.com/picklecartblr?vrfl=bWpnem5iZ2tzazZq&utm_source=qr",
   facebook: "https://www.facebook.com/people/picklecartblr/61594937865483/?mibextid=wwXIfr&rdid=UbFZHnMzFkFCSouJ&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F14tc8bBzU9C%2F%3Fmibextid%3DwwXIfr",

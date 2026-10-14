@@ -60,6 +60,9 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
   let orderTotal = 0;
   let items = [];
   let customerInfo = null;
+  let subtotal = 0;
+  let shipping = 0;
+  let discount = 0;
 
   if (typeof dataOrEmail === "object" && dataOrEmail !== null) {
     customerEmail = dataOrEmail.customer?.email;
@@ -67,10 +70,18 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
     orderTotal = dataOrEmail.total;
     items = dataOrEmail.items || [];
     customerInfo = dataOrEmail.customer;
+    shipping = Number(
+      dataOrEmail.shippingFee ?? 
+      dataOrEmail.shipping ?? 
+      Math.max(0, (Number(dataOrEmail.total) || 0) - (Number(dataOrEmail.subtotal) || 0) + (Number(dataOrEmail.discount) || 0))
+    );
+    discount = Number(dataOrEmail.discount || 0);
+    subtotal = Number(dataOrEmail.subtotal ?? (Number(orderTotal) - shipping + discount));
   } else {
     customerEmail = dataOrEmail;
     name = customerName || "Valued Customer";
     orderTotal = total;
+    subtotal = total;
   }
 
   if (!customerEmail) {
@@ -100,9 +111,16 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e7e0d3;">
             
             <!-- Header Banner -->
-            <div style="background-color: #8C2D19; padding: 28px 24px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">PickleCart</h1>
-              <p style="color: #F8D98C; margin: 6px 0 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.15em;">Fill Your Cart with Tradition</p>
+            <div style="background-color: #8C2D19; padding: 26px 20px 22px 20px; text-align: center;">
+              <a href="https://www.picklecart.in" target="_blank" style="text-decoration: none; display: inline-block;">
+                <img 
+                  src="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740886/picklecart_assets/footerlogo.png" 
+                  alt="PickleCart" 
+                  width="190" 
+                  style="display: block; margin: 0 auto; max-width: 190px; width: 100%; height: auto; border: 0; outline: none;" 
+                />
+              </a>
+              <p style="color: #F8D98C; margin: 8px 0 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em;">Fill Your Cart with Tradition</p>
             </div>
 
             <!-- Body Content -->
@@ -123,6 +141,19 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
                   <span style="color: #666666;">Order Date:</span>
                   <span style="color: #222222;">${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                 </div>
+                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                  <span style="color: #666666;">Items Subtotal:</span>
+                  <span style="color: #222222;">₹${subtotal}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                  <span style="color: #666666;">Delivery Fee:</span>
+                  <span style="color: ${shipping === 0 ? '#047857' : '#222222'}; font-weight: ${shipping === 0 ? '600' : '400'};">${shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
+                </div>
+                ${discount > 0 ? `
+                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                  <span style="color: #047857;">Discount:</span>
+                  <span style="color: #047857;">-₹${discount}</span>
+                </div>` : ''}
                 <div style="display: flex; justify-content: space-between; font-size: 15px; padding-top: 8px; border-top: 1px dashed #ded4c1;">
                   <span style="color: #222222; font-weight: 600;">Total Amount Paid:</span>
                   <strong style="color: #8C2D19; font-size: 17px;">₹${orderTotal}</strong>
@@ -188,8 +219,11 @@ export async function sendOwnerNewOrderEmail(orderId, orderData) {
   const items = orderData.items || [];
   const total = orderData.total || 0;
   const subtotal = orderData.subtotal || total;
-  const discount = orderData.discount || 0;
-  const shipping = orderData.shipping !== undefined ? orderData.shipping : (subtotal >= 1500 ? 0 : 99);
+  const shipping = Number(
+    orderData.shippingFee ?? 
+    orderData.shipping ?? 
+    Math.max(0, (Number(total) || 0) - (Number(subtotal) || 0) + (Number(discount) || 0))
+  );
   const paymentId = orderData.razorpayPaymentId || "N/A";
   const customerName = customer.fullName || "Customer";
   const customerPhone = customer.mobile || customer.phone || "Not provided";

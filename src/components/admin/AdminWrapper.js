@@ -27,7 +27,7 @@ export default function AdminWrapper({ children }) {
     <>
       <AdminSidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
       
-      <div className="flex-1 flex flex-col min-h-screen transition-all duration-300 w-full ml-0 lg:ml-64">
+      <div className="flex-1 flex flex-col min-h-screen transition-all duration-300 w-full ml-0 lg:ml-64 min-w-0">
         {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b border-border-light p-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
           <Link href="/" className="relative h-8 w-32 block">
@@ -42,7 +42,7 @@ export default function AdminWrapper({ children }) {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-x-hidden p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-x-hidden p-4 md:p-6 lg:p-8 min-w-0">
           {children}
         </main>
       </div>

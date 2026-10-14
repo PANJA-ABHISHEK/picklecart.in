@@ -86,11 +86,11 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico" },
+      { url: "/newpicklecartfavicon.png", type: "image/png" },
       { url: "/favicon.png", type: "image/png" },
-      { url: "/Picklecart Favicon.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "/newpicklecartfavicon.png",
     apple: "/apple-icon.png",
   },
   verification: {

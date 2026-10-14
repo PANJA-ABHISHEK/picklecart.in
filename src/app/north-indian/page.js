@@ -1,16 +1,9 @@
-import { REGIONS } from "@/lib/constants";
+import { REGIONS, CATEGORIES } from "@/lib/constants";
 import RegionPageContent from "@/components/regional/RegionPageContent";
 import { getProductsByRegion } from "@/services/products";
 import { generateBreadcrumbSchema } from "@/lib/seo/schema";
 
 const REGION_ID = "north-indian";
-
-const northCategories = [
-  { id: "veg-pickles", name: "Pickles", slug: "veg-pickles", description: "", image: "" },
-  { id: "snacks", name: "Snacks", slug: "snacks", description: "", image: "" },
-  { id: "podi-powders", name: "Powders", slug: "podi-powders", description: "", image: "" },
-  { id: "other-items", name: "Other Items", slug: "other-items", description: "", image: "" },
-];
 
 export const metadata = {
   title: "North Indian Pickles Online | Authentic Aam Ka Achaar & Mixed Pickle | PickleCart",
@@ -50,7 +43,7 @@ export default async function NorthIndianPage() {
         title={region.name}
         description={region.description}
         regions={[region]}
-        categories={northCategories}
+        categories={CATEGORIES}
         regionFilter={REGION_ID}
         bgImage="https://res.cloudinary.com/epv5nqqv/image/upload/f_auto,q_auto/v1791740865/picklecart_assets/northindianpagebackground.png"
         allProducts={allProducts}

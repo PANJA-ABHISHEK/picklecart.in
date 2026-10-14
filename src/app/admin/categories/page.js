@@ -1,28 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Edit2, X, FolderTree, MapPin, Check } from "lucide-react";
+import { Plus, Trash2, Edit2, X, FolderTree } from "lucide-react";
 import {
   getCategories, createCategory, updateCategory, deleteCategory,
-  getRegions, createRegion, deleteRegion,
 } from "@/app/actions/taxonomy";
-import { REGIONS as CONST_REGIONS, CATEGORIES as BUILT_IN_CATEGORIES } from "@/lib/constants";
-
-// Available regions for multi-select checkboxes
-const AVAILABLE_REGIONS = CONST_REGIONS.map(r => ({ id: r.id, name: r.name }));
+import { CATEGORIES as BUILT_IN_CATEGORIES } from "@/lib/constants";
 
 // Built-in category IDs that cannot be deleted
 const BUILT_IN_IDS = new Set(BUILT_IN_CATEGORIES.map(c => c.id));
 
-export default function CategoriesRegionsPage() {
+export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
-  const [regions, setRegions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null); // null = new, object = editing
-  const [formData, setFormData] = useState({ name: "", description: "", regions: [] });
+  const [formData, setFormData] = useState({ name: "", description: "" });
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -36,16 +31,15 @@ export default function CategoriesRegionsPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [catsRes, regsRes] = await Promise.all([getCategories(), getRegions()]);
+    const catsRes = await getCategories();
     if (catsRes.success) setCategories(catsRes.categories);
-    if (regsRes.success) setRegions(regsRes.regions);
     setLoading(false);
   };
 
   // ── Category Modal ──
   const openNewModal = () => {
     setEditingCategory(null);
-    setFormData({ name: "", description: "", regions: [] });
+    setFormData({ name: "", description: "" });
     setFormError("");
     setIsModalOpen(true);
   };
@@ -55,29 +49,15 @@ export default function CategoriesRegionsPage() {
     setFormData({
       name: cat.name,
       description: cat.description || "",
-      regions: cat.regions || [],
     });
     setFormError("");
     setIsModalOpen(true);
-  };
-
-  const toggleRegion = (regionId) => {
-    setFormData(prev => ({
-      ...prev,
-      regions: prev.regions.includes(regionId)
-        ? prev.regions.filter(r => r !== regionId)
-        : [...prev.regions, regionId],
-    }));
   };
 
   const handleSaveCategory = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
       setFormError("Category name is required.");
-      return;
-    }
-    if (formData.regions.length === 0) {
-      setFormError("Please select at least one region.");
       return;
     }
 
@@ -109,12 +89,6 @@ export default function CategoriesRegionsPage() {
     fetchData();
   };
 
-  // ── Region helpers ──
-  const getRegionName = (id) => {
-    const found = AVAILABLE_REGIONS.find(r => r.id === id);
-    return found ? found.name : id;
-  };
-
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -130,7 +104,7 @@ export default function CategoriesRegionsPage() {
         <div>
           <h1 className="text-4xl font-display font-bold text-earthy-brown-dark tracking-tight mb-1">Categories</h1>
           <p className="text-earthy-brown-light font-medium text-sm">
-            Create and manage product categories across regions
+            Create and manage product categories
           </p>
         </div>
         <button
@@ -148,7 +122,6 @@ export default function CategoriesRegionsPage() {
         const extraCats = categories.filter(c => !BUILT_IN_IDS.has(c.id));
         const allCats = [
           ...BUILT_IN_CATEGORIES.map(c => {
-            // If it exists in Firestore, merge the Firestore data (regions, etc)
             const fromDb = categories.find(db => db.id === c.id);
             return fromDb ? { ...c, ...fromDb, builtIn: true } : { ...c, builtIn: true };
           }),
@@ -156,89 +129,70 @@ export default function CategoriesRegionsPage() {
         ];
 
         return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {allCats.map((cat) => (
-            <div
-              key={cat.id}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow group"
-            >
-              {/* Top */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${cat.builtIn ? 'bg-blue-50' : 'bg-heritage-green/10'}`}>
-                    <FolderTree size={18} className={cat.builtIn ? 'text-blue-600' : 'text-heritage-green'} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-charcoal text-sm">{cat.name}</p>
-                      {cat.builtIn && (
-                        <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold uppercase">Built-in</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {allCats.map((cat) => (
+              <div
+                key={cat.id}
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between gap-3 hover:shadow-md transition-shadow group min-h-[110px]"
+              >
+                {/* Top */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${cat.builtIn ? 'bg-blue-50' : 'bg-heritage-green/10'}`}>
+                      <FolderTree size={18} className={cat.builtIn ? 'text-blue-600' : 'text-heritage-green'} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-charcoal text-sm">{cat.name}</p>
+                        {cat.builtIn && (
+                          <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold uppercase">Built-in</span>
+                        )}
+                      </div>
+                      {cat.description && (
+                        <p className="text-xs text-charcoal/50 mt-1 line-clamp-2">{cat.description}</p>
                       )}
                     </div>
-                    {cat.description && (
-                      <p className="text-xs text-charcoal/50 mt-0.5 line-clamp-1">{cat.description}</p>
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {!cat.builtIn && (
+                      <>
+                        <button
+                          onClick={() => openEditModal(cat)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(cat)}
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {!cat.builtIn && (
-                    <>
-                      <button
-                        onClick={() => openEditModal(cat)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit"
-                      >
-                        <Edit2 size={14} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(cat)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </>
-                  )}
-                </div>
               </div>
+            ))}
 
-              {/* Region Pills */}
-              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-50">
-                {(cat.regions && cat.regions.length > 0) ? (
-                  cat.regions.map((rid) => (
-                    <span
-                      key={rid}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-heritage-green/10 text-heritage-green"
-                    >
-                      <MapPin size={10} />
-                      {getRegionName(rid)}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-[10px] text-charcoal/40">{cat.builtIn ? 'All regions' : 'No regions assigned'}</span>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {/* Add card */}
-          <button
-            onClick={openNewModal}
-            className="border-2 border-dashed border-gray-200 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-charcoal/40 hover:border-charcoal/30 hover:text-charcoal/60 transition-colors min-h-[120px] cursor-pointer"
-          >
-            <Plus size={24} />
-            <span className="text-xs font-medium">Add Category</span>
-          </button>
-        </div>
+            {/* Add card */}
+            <button
+              onClick={openNewModal}
+              className="border-2 border-dashed border-gray-200 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-charcoal/40 hover:border-charcoal/30 hover:text-charcoal/60 transition-colors min-h-[110px] cursor-pointer"
+            >
+              <Plus size={24} />
+              <span className="text-xs font-medium">Add Category</span>
+            </button>
+          </div>
         );
       })()}
 
       {/* ═══ CREATE/EDIT MODAL ═══ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/30 backdrop-blur-sm">
-          <div
-            className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200"
-          >
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <div>
@@ -246,7 +200,7 @@ export default function CategoriesRegionsPage() {
                   {editingCategory ? "Edit Category" : "Add Category"}
                 </h2>
                 <p className="text-xs text-charcoal/50 mt-0.5">
-                  {editingCategory ? "Update the category details below" : "Create a new product category and assign regions"}
+                  {editingCategory ? "Update the category details below" : "Create a new product category"}
                 </p>
               </div>
               <button
@@ -292,44 +246,6 @@ export default function CategoriesRegionsPage() {
                   placeholder="Short description of this category"
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:border-heritage-green focus:ring-1 focus:ring-heritage-green/20 outline-none transition-all text-sm"
                 />
-              </div>
-
-              {/* Region Multi-Select */}
-              <div>
-                <label className="block text-sm font-medium text-charcoal mb-2">
-                  Publish to Regions <span className="text-red-500">*</span>
-                </label>
-                <p className="text-xs text-charcoal/50 mb-3">
-                  Select which regions this category should appear in
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {AVAILABLE_REGIONS.map((region) => {
-                    const isSelected = formData.regions.includes(region.id);
-                    return (
-                      <button
-                        key={region.id}
-                        type="button"
-                        onClick={() => toggleRegion(region.id)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-left text-sm font-medium transition-all ${
-                          isSelected
-                            ? "border-heritage-green bg-heritage-green/5 text-heritage-green"
-                            : "border-gray-200 bg-white text-charcoal/70 hover:border-gray-300"
-                        }`}
-                      >
-                        <div
-                          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                            isSelected
-                              ? "border-heritage-green bg-heritage-green"
-                              : "border-gray-300"
-                          }`}
-                        >
-                          {isSelected && <Check size={12} className="text-white" />}
-                        </div>
-                        {region.name}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
 
               {/* Actions */}

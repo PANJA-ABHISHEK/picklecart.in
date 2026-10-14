@@ -192,7 +192,7 @@ export default function AdminOrdersPage() {
           itemsStr,
           totalUnits,
           Number(o.subtotal ?? o.total ?? 0),
-          Number(o.shippingFee ?? 0),
+          Number(o.shippingFee ?? o.shipping ?? 0),
           Number(o.discount ?? 0),
           String(o.appliedPromo?.code || ""),
           Number(o.total ?? 0),
@@ -357,7 +357,7 @@ export default function AdminOrdersPage() {
   }, [orders]);
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="max-w-7xl mx-auto">
       {/* Toast Notification */}
       {toastMessage && (
         <div className={`mb-6 p-4 rounded-2xl border font-medium flex items-center justify-between gap-3 animate-in fade-in duration-200 ${
@@ -383,7 +383,7 @@ export default function AdminOrdersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 flex-wrap">
+        <div className="flex items-center gap-3 shrink-0 flex-wrap sm:mr-8 md:mr-12 lg:mr-16">
           {/* Refresh button */}
           <button
             onClick={() => fetchOrders(true)}
@@ -887,7 +887,9 @@ export default function AdminOrdersPage() {
                   <div className="flex justify-between text-charcoal-muted">
                     <span>Shipping Fee:</span>
                     <span className="font-mono font-medium">
-                      {selectedOrder.shippingFee > 0 ? formatPrice(selectedOrder.shippingFee) : "FREE"}
+                      {(Number(selectedOrder.shippingFee ?? selectedOrder.shipping ?? Math.max(0, (selectedOrder.total || 0) - (selectedOrder.subtotal || 0) + (selectedOrder.discount || 0)))) > 0
+                        ? formatPrice(selectedOrder.shippingFee ?? selectedOrder.shipping ?? Math.max(0, (selectedOrder.total || 0) - (selectedOrder.subtotal || 0) + (selectedOrder.discount || 0)))
+                        : "FREE"}
                     </span>
                   </div>
                   {selectedOrder.discount > 0 && (

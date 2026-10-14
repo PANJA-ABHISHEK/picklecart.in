@@ -29,7 +29,7 @@ export function generateOrganizationSchema() {
       streetAddress: "Kodigehalli Main Road, K.R. Puram",
       addressLocality: "Bangalore",
       addressRegion: "Karnataka",
-      postalCode: "560049",
+      postalCode: "560036",
       addressCountry: "IN",
     },
     geo: {

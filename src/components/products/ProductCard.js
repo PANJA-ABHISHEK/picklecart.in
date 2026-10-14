@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Star, ShoppingBag, Heart, Check } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, sortVariantsByWeight } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 import Badge from "@/components/ui/Badge";
@@ -11,20 +11,44 @@ import { resolveImage } from "@/services/images";
 
 export default function ProductCard({ product, className = "" }) {
   const { addItem, openDrawer } = useCart();
-  const variants = product.pricing || product.variants || [];
-  const [selectedVariant, setSelectedVariant] = useState(variants[0] || { price: 0, label: "Default", id: "default" });
+  const rawVariants = useMemo(() => product.pricing || product.variants || [], [product.pricing, product.variants]);
+  const variants = useMemo(() => sortVariantsByWeight(rawVariants), [rawVariants]);
+  const [selectedVariant, setSelectedVariant] = useState(
+    () => variants[0] || { price: product.price || 0, label: "Default", id: "default" }
+  );
   const [isAdding, setIsAdding] = useState(false);
+
+  // Sync to smallest starting weight whenever the product changes
+  useEffect(() => {
+    if (variants.length > 0) {
+      setSelectedVariant(variants[0]);
+    } else {
+      setSelectedVariant({ price: product.price || 0, label: "Default", id: "default" });
+    }
+  }, [product.id, variants]);
+
+  const isVariantActive = (v) => {
+    if (!selectedVariant) return false;
+    if (v.id && selectedVariant.id) return v.id === selectedVariant.id;
+    if (v.weight && selectedVariant.weight) return v.weight === selectedVariant.weight;
+    if (v.label && selectedVariant.label) return v.label === selectedVariant.label;
+    return v === selectedVariant;
+  };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
+    const price = selectedVariant?.price ?? product.price ?? 0;
+    const variantId = selectedVariant?.id || selectedVariant?.weight || selectedVariant?.label || "default";
+    const variantLabel = selectedVariant?.weight || selectedVariant?.label || "Default";
+
     addItem({
       productId: product.id,
-      variantId: selectedVariant.id,
+      variantId,
       name: product.name,
-      variantLabel: selectedVariant.weight || selectedVariant.label || "Default",
-      price: selectedVariant.price,
+      variantLabel,
+      price,
       image: product.image || product.images?.[0] || null,
     });
 
@@ -38,10 +62,11 @@ export default function ProductCard({ product, className = "" }) {
   const productImg = product.image || product.images?.[0] || null;
   const imageUrl = resolveImage(productImg, { width: 400, height: 400, text: product.name });
 
-  const compareAtPrice = selectedVariant.originalPrice || product.compareAtPrice;
-  const hasDiscount = compareAtPrice && compareAtPrice > selectedVariant.price;
+  const currentPrice = selectedVariant?.price ?? product.price ?? 0;
+  const compareAtPrice = selectedVariant?.originalPrice || product.compareAtPrice;
+  const hasDiscount = compareAtPrice && compareAtPrice > currentPrice;
   const discountPercentage = hasDiscount 
-    ? Math.round(((compareAtPrice - selectedVariant.price) / compareAtPrice) * 100)
+    ? Math.round(((compareAtPrice - currentPrice) / compareAtPrice) * 100)
     : (product.discountPercentage || 0);
 
   return (
@@ -80,14 +105,12 @@ export default function ProductCard({ product, className = "" }) {
           </h3>
         </Link>
 
-        {/* Removed Rating per user request */}
-
         {/* Bottom Actions Container (Pushed to bottom) */}
         <div className="mt-auto pt-3">
           {/* Price */}
           <div className="flex items-baseline gap-2">
             <span className="text-base font-body font-bold text-charcoal">
-              {formatPrice(selectedVariant.price)}
+              {formatPrice(currentPrice)}
             </span>
             {compareAtPrice && (
               <span className="text-sm font-body text-charcoal-muted line-through">
@@ -99,23 +122,29 @@ export default function ProductCard({ product, className = "" }) {
           {/* Variants */}
           {variants.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2.5">
-              {variants.map((v, idx) => (
-                <button
-                  key={v.id || idx}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setSelectedVariant(v);
-                  }}
-                  className={`px-2.5 py-1 text-xs font-body rounded-full border transition-all duration-200 ${
-                    selectedVariant.id === v.id
-                      ? "border-heritage-green bg-heritage-green/5 text-heritage-green font-medium"
-                      : "border-border text-charcoal-muted hover:border-charcoal-muted"
-                  }`}
-                  aria-label={`Select ${v.weight || v.label}`}
-                >
-                  {v.weight || v.label}
-                </button>
-              ))}
+              {variants.map((v, idx) => {
+                const active = isVariantActive(v);
+                return (
+                  <button
+                    key={v.id || v.weight || idx}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedVariant(v);
+                    }}
+                    className={`px-2.5 py-1 text-xs font-body rounded-full border transition-all duration-200 cursor-pointer ${
+                      active
+                        ? "border-heritage-green bg-heritage-green text-warm-white font-semibold shadow-xs"
+                        : "border-border-light bg-warm-white text-charcoal-muted hover:border-charcoal-muted/60 hover:text-charcoal"
+                    }`}
+                    aria-label={`Select ${v.weight || v.label}`}
+                    aria-pressed={active}
+                  >
+                    {v.weight || v.label}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -127,7 +156,7 @@ export default function ProductCard({ product, className = "" }) {
               isAdding
                 ? "bg-heritage-green text-white"
                 : (product.inStock || selectedVariant?.inStock)
-                ? "bg-charcoal text-warm-white hover:bg-heritage-green active:scale-95"
+                ? "bg-charcoal text-warm-white hover:bg-heritage-green active:scale-95 cursor-pointer"
                 : "bg-charcoal-muted/20 text-charcoal-muted cursor-not-allowed"
             }`}
           >
@@ -139,3 +168,4 @@ export default function ProductCard({ product, className = "" }) {
     </div>
   );
 }
+

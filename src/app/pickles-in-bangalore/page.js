@@ -52,7 +52,7 @@ export const metadata = {
 const BANGALORE_FAQS = [
   {
     question: "Where in Bangalore is PickleCart located?",
-    answer: "PickleCart operates from Kodigehalli Main Road, K.R. Puram, Bangalore - 560049. Orders are prepared and dispatched directly from our Bangalore hub to ensure maximum freshness.",
+    answer: "PickleCart operates from Kodigehalli Main Road, K.R. Puram, Bangalore - 560036. Orders are prepared and dispatched directly from our Bangalore hub to ensure maximum freshness.",
   },
   {
     question: "How fast is pickle delivery within Bangalore?",

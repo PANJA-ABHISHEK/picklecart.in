@@ -26,7 +26,10 @@ export default async function SouthIndianPage() {
   const regionIds = southRegions.map(r => r.id);
   
   const allProductsFull = await getProducts();
-  const allProducts = allProductsFull.filter(p => regionIds.includes(p.regionId));
+  const allProducts = allProductsFull.filter((p) => {
+    const pRegions = p.regions || p.regionIds || (p.regionId ? [p.regionId] : []);
+    return pRegions.some((rid) => regionIds.includes(rid));
+  });
 
   const breadcrumbsSchema = generateBreadcrumbSchema([
     { name: "Home", url: "/" },
