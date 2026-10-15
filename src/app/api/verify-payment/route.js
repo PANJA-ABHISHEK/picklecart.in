@@ -12,7 +12,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const secret = (process.env.RAZORPAY_KEY_SECRET || "").toString().trim().replace(/^["']|["']$/g, '');
     if (!secret) {
       throw new Error("Razorpay secret is not configured on the server.");
     }

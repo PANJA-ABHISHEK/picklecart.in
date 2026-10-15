@@ -159,7 +159,7 @@ export default function CheckoutPage() {
 
       // 3. Open Razorpay Checkout Modal
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+        key: orderRes.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
         amount: orderRes.amount,
         currency: orderRes.currency,
         name: "PickleCart",

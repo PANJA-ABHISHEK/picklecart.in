@@ -4,6 +4,15 @@ import { adminDb } from "@/lib/firebase/admin";
 import { pushOrderToShiprocket, getShiprocketTracking } from "@/lib/shiprocket";
 import Razorpay from "razorpay";
 
+function cleanEnv(val) {
+  if (!val) return "";
+  let str = val.toString().trim();
+  if ((str.startsWith('"') && str.endsWith('"')) || (str.startsWith("'") && str.endsWith("'"))) {
+    str = str.slice(1, -1).trim();
+  }
+  return str;
+}
+
 export async function createOrder(cartItems, customerInfo, promoCode = null) {
   try {
 
@@ -108,9 +117,20 @@ export async function createOrder(cartItems, customerInfo, promoCode = null) {
       throw new Error("Invalid order total");
     }
 
+    const cleanKeyId = cleanEnv(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID);
+    const cleanKeySecret = cleanEnv(process.env.RAZORPAY_KEY_SECRET);
+
+    if (!cleanKeyId || !cleanKeySecret) {
+      console.error("[Orders] Razorpay credentials missing on server:", { 
+        hasKeyId: Boolean(cleanKeyId), 
+        hasKeySecret: Boolean(cleanKeySecret) 
+      });
+      throw new Error(`Razorpay credentials missing on server (Key ID: ${cleanKeyId ? "OK" : "MISSING"}, Secret: ${cleanKeySecret ? "OK" : "MISSING"})`);
+    }
+
     const razorpay = new Razorpay({
-      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
+      key_id: cleanKeyId,
+      key_secret: cleanKeySecret,
     });
 
     // 3. Create Razorpay Order
@@ -151,10 +171,12 @@ export async function createOrder(cartItems, customerInfo, promoCode = null) {
       razorpayOrderId: rzpOrder.id,
       amount: options.amount,
       currency: options.currency,
+      keyId: cleanKeyId,
     };
   } catch (error) {
     console.error("Order creation failed:", error);
-    return { success: false, error: error.message || "Failed to create order" };
+    const errorMsg = error?.error?.description || error?.description || error?.message || "Failed to create order";
+    return { success: false, error: errorMsg };
   }
 }
 
