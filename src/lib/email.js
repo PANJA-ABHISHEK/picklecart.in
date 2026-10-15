@@ -101,10 +101,16 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
   const deliveryAddress = addressParts.join(", ");
   const itemsTable = renderItemsHtml(items);
 
+  // Deliver a copy directly to the store owner so they receive confirmation of every order
+  const bccRecipients = (OWNER_EMAIL && OWNER_EMAIL.trim().toLowerCase() !== customerEmail.trim().toLowerCase())
+    ? [OWNER_EMAIL.trim()]
+    : undefined;
+
   try {
-    const { data, error } = await resend.emails.send({
+    const emailPayload = {
       from: 'PickleCart <orders@picklecart.in>',
       to: [customerEmail],
+      ...(bccRecipients ? { bcc: bccRecipients } : {}),
       subject: `Order Confirmed! #${orderId} - PickleCart`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 24px 16px; background-color: #f7f4ed;">
@@ -192,7 +198,9 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
           </div>
         </div>
       `,
-    });
+    };
+
+    const { data, error } = await resend.emails.send(emailPayload);
 
     if (error) {
       console.error("[Email] Resend customer confirmation email error:", error);
@@ -217,12 +225,13 @@ export async function sendOwnerNewOrderEmail(orderId, orderData) {
 
   const customer = orderData.customer || {};
   const items = orderData.items || [];
-  const total = orderData.total || 0;
-  const subtotal = orderData.subtotal || total;
+  const total = Number(orderData.total || 0);
+  const discount = Number(orderData.discount || 0);
+  const subtotal = Number(orderData.subtotal ?? (total + discount));
   const shipping = Number(
     orderData.shippingFee ?? 
     orderData.shipping ?? 
-    Math.max(0, (Number(total) || 0) - (Number(subtotal) || 0) + (Number(discount) || 0))
+    Math.max(0, total - (orderData.subtotal ? Number(orderData.subtotal) : total) + discount)
   );
   const paymentId = orderData.razorpayPaymentId || "N/A";
   const customerName = customer.fullName || "Customer";
