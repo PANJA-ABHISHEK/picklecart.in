@@ -101,16 +101,10 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
   const deliveryAddress = addressParts.join(", ");
   const itemsTable = renderItemsHtml(items);
 
-  // Deliver a copy directly to the store owner so they receive confirmation of every order
-  const bccRecipients = (OWNER_EMAIL && OWNER_EMAIL.trim().toLowerCase() !== customerEmail.trim().toLowerCase())
-    ? [OWNER_EMAIL.trim()]
-    : undefined;
-
   try {
-    const emailPayload = {
+    const { data, error } = await resend.emails.send({
       from: 'PickleCart <orders@picklecart.in>',
       to: [customerEmail],
-      ...(bccRecipients ? { bcc: bccRecipients } : {}),
       subject: `Order Confirmed! #${orderId} - PickleCart`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 24px 16px; background-color: #f7f4ed;">
@@ -198,9 +192,7 @@ export async function sendOrderConfirmationEmail(orderId, dataOrEmail, customerN
           </div>
         </div>
       `,
-    };
-
-    const { data, error } = await resend.emails.send(emailPayload);
+    });
 
     if (error) {
       console.error("[Email] Resend customer confirmation email error:", error);
